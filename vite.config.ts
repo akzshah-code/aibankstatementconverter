@@ -11,4 +11,8 @@ export default defineConfig({
       input: './index.html', // explicitly point to index.html
     },
   },
+<<<<<<< HEAD
 })
+=======
+})
+>>>>>>> c2a45ae37b10530bd4bd6ed83bc4d393cc27757b
