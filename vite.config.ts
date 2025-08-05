@@ -10,4 +10,8 @@ export default defineConfig({
       input: 'index.html', 
     },
   },
+<<<<<<< HEAD
 })
+=======
+})
+>>>>>>> a344fc05a0de9bbe9f6d6ae72bf81a8e2281c6f9
