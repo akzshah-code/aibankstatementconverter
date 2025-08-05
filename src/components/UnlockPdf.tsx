@@ -278,8 +278,11 @@ const UnlockPdf: React.FC = () => {
       <div className="container mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Unlock Encrypted PDFs</h2>
-          <p className="text-lg text-secondary mb-12">
+          <p className="text-lg text-secondary mb-4">
             Remove passwords from your PDF files securely in your browser. Your files never leave your computer.
+          </p>
+          <p className="text-xs text-gray-500 italic mb-10">
+            By using this tool, you confirm that you have the legal right to access and decrypt this file.
           </p>
         </div>
         

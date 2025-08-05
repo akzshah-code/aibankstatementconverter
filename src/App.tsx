@@ -11,9 +11,13 @@ import DemoView from './components/DemoView';
 import Pricing from './components/Pricing';
 import Login from './components/Login';
 import Register from './components/Register';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
+
+type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock' | 'privacy' | 'terms';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock'>('main');
+  const [view, setView] = useState<View>('main');
   const heroRef = useRef<HTMLElement>(null);
 
   const handleEnterDemo = () => setView('demo');
@@ -36,6 +40,16 @@ const App: React.FC = () => {
 
   const showUnlockPage = () => {
     setView('unlock');
+    window.scrollTo(0, 0);
+  };
+
+  const showPrivacyPage = () => {
+    setView('privacy');
+    window.scrollTo(0, 0);
+  };
+
+  const showTermsPage = () => {
+    setView('terms');
     window.scrollTo(0, 0);
   };
 
@@ -70,6 +84,10 @@ const App: React.FC = () => {
         return <Register onNavigateToLogin={showLoginPage} />;
       case 'unlock':
         return <UnlockPdf />;
+      case 'privacy':
+        return <PrivacyPolicy />;
+      case 'terms':
+        return <TermsOfService />;
       case 'main':
       default:
         return (
@@ -102,7 +120,7 @@ const App: React.FC = () => {
       <main className="pt-20"> {/* Adjusted padding for fixed header */}
         {renderContent()}
       </main>
-      <Footer />
+      <Footer onNavigateToPrivacy={showPrivacyPage} onNavigateToTerms={showTermsPage} />
     </div>
   );
 };

@@ -1,12 +1,22 @@
 import React from 'react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigateToPrivacy: () => void;
+  onNavigateToTerms: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms }) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, handler: () => void) => {
+    e.preventDefault();
+    handler();
+  };
+
   const footerLinks = [
-    { href: '#', text: 'API Docs' },
-    { href: '#', text: 'About' },
-    { href: '#', text: 'Terms' },
-    { href: '#', text: 'Privacy' },
-    { href: '#', text: 'Blog' },
+    { text: 'API Docs', handler: () => alert('Coming soon!') },
+    { text: 'About', handler: () => alert('Coming soon!') },
+    { text: 'Terms', handler: onNavigateToTerms },
+    { text: 'Privacy', handler: onNavigateToPrivacy },
+    { text: 'Blog', handler: () => alert('Coming soon!') },
   ];
 
   return (
@@ -14,7 +24,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-6 py-8 text-center">
         <div className="flex justify-center space-x-6 mb-4">
           {footerLinks.map(link => (
-            <a key={link.text} href={link.href} className="text-gray-300 hover:text-primary transition-colors duration-300">
+            <a key={link.text} href="#" onClick={(e) => handleLinkClick(e, link.handler)} className="text-gray-300 hover:text-primary transition-colors duration-300 cursor-pointer">
               {link.text}
             </a>
           ))}
