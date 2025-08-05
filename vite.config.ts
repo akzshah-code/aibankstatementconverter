@@ -1,4 +1,4 @@
-// vite.config.ts
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: 'index.html', // assuming index.html is at root
+      input: 'index.html', 
     },
   },
 })
