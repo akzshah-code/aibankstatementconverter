@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: './index.html', // explicitly point to index.html
+      input: './index.html',
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'pdf-lib']
