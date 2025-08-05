@@ -1,4 +1,3 @@
-// vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -9,10 +8,11 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: './index.html', // explicitly point to index.html
-    },
-  },
-<<<<<<< HEAD
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'pdf-lib']
+        }
+      }
+    }
+  }
 })
-=======
-})
->>>>>>> c2a45ae37b10530bd4bd6ed83bc4d393cc27757b
