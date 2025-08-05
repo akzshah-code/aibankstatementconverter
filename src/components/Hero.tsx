@@ -1,9 +1,20 @@
-import React from 'react';
-import Converter from './Converter';
+import React, { lazy, Suspense } from 'react';
+
+const Converter = lazy(() => import('./Converter'));
 
 interface HeroProps {
   onTryDemo: () => void;
 }
+
+const ConverterSpinner: React.FC = () => (
+    <div className="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full border border-gray-200 flex justify-center items-center min-h-[680px]">
+         <div className="text-center">
+            <div className="w-12 h-12 border-4 border-dashed rounded-full animate-spin border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600 font-semibold">Loading Converter...</p>
+         </div>
+    </div>
+);
+
 
 const Hero = React.forwardRef<HTMLElement, HeroProps>(({ onTryDemo }, ref) => {
   return (
@@ -35,7 +46,9 @@ const Hero = React.forwardRef<HTMLElement, HeroProps>(({ onTryDemo }, ref) => {
           
           {/* Right Column: Converter Component */}
           <div className="w-full">
-            <Converter />
+            <Suspense fallback={<ConverterSpinner />}>
+              <Converter />
+            </Suspense>
           </div>
 
         </div>

@@ -1,20 +1,28 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import AdSlot from './components/AdSlot';
 import UsageTiers from './components/UsageTiers';
 import Features from './components/Features';
 import BankSupport from './components/BankSupport';
-import UnlockPdf from './components/UnlockPdf';
 import Footer from './components/Footer';
-import DemoView from './components/DemoView';
-import Pricing from './components/Pricing';
-import Login from './components/Login';
-import Register from './components/Register';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import TermsOfService from './components/TermsOfService';
+
+// Lazy load components for different views to enable code-splitting
+const Pricing = lazy(() => import('./components/Pricing'));
+const DemoView = lazy(() => import('./components/DemoView'));
+const Login = lazy(() => import('./components/Login'));
+const Register = lazy(() => import('./components/Register'));
+const UnlockPdf = lazy(() => import('./components/UnlockPdf'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/TermsOfService'));
 
 type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock' | 'privacy' | 'terms';
+
+const LoadingSpinner: React.FC = () => (
+    <div className="flex justify-center items-center py-20 min-h-[calc(100vh-160px)]">
+        <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary"></div>
+    </div>
+);
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('main');
@@ -118,7 +126,9 @@ const App: React.FC = () => {
         onNavigateHome={() => navigateToMainPage()}
       />
       <main className="pt-20"> {/* Adjusted padding for fixed header */}
-        {renderContent()}
+        <Suspense fallback={<LoadingSpinner />}>
+          {renderContent()}
+        </Suspense>
       </main>
       <Footer onNavigateToPrivacy={showPrivacyPage} onNavigateToTerms={showTermsPage} />
     </div>
