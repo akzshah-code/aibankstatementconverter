@@ -161,7 +161,7 @@ const Converter: React.FC = () => {
 
     try {
       const apiKey = import.meta.env.VITE_API_KEY;
-      if (!apiKey) throw new Error("API_KEY environment variable not set. Please configure it in your deployment settings.");
+      if (!apiKey) throw new Error("VITE_API_KEY environment variable not set. Please configure it in your deployment settings.");
       const ai = new GoogleGenAI({ apiKey });
       const base64Data = await fileToBase64(file);
 
@@ -208,7 +208,8 @@ const Converter: React.FC = () => {
         contents: { parts: [filePart, textPart] },
         config: { 
           responseMimeType: "application/json", 
-          responseSchema: schema
+          responseSchema: schema,
+          thinkingConfig: { thinkingBudget: 0 }
         }
       });
       

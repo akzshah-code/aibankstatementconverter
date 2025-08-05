@@ -87,10 +87,8 @@ const UnlockPdf: React.FC = () => {
 
     } catch (err: any) {
       setStatus('password'); // Go back to password entry screen
-      // pdf-lib can throw a generic "encrypted" error for wrong passwords.
-      // We check for both the specific error name and the generic message to be safe.
       if (err.name === 'PasswordIsIncorrectError' || (err.message && err.message.toLowerCase().includes('encrypted'))) {
-        setError('Incorrect password. Please try again. (Hint: use "password123")');
+        setError('Incorrect password. If you are certain the password is correct, the file may use an encryption method that is not supported.');
       } else {
         console.error("PDF Unlock failed:", err);
         setError('An unexpected error occurred. The file may be corrupted or use unsupported encryption.');
@@ -215,7 +213,7 @@ const UnlockPdf: React.FC = () => {
                                   <button
                                       type="button"
                                       onClick={() => setShowPassword(!showPassword)}
-                                      className="h-full px-4 text-white bg-red-600 rounded-r-md hover:bg-red-700 flex items-center justify-center focus:outline-none"
+                                      className="h-full px-4 text-white bg-gray-600 rounded-r-md hover:bg-gray-700 flex items-center justify-center focus:outline-none"
                                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                                   >
                                       <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
