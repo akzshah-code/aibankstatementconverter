@@ -3,9 +3,10 @@ import React from 'react';
 interface FooterProps {
   onNavigateToPrivacy: () => void;
   onNavigateToTerms: () => void;
+  onNavigateToAbout: () => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms }) => {
+const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout }) => {
   const handleLinkClick = (handler: () => void) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handler();
@@ -13,7 +14,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms 
 
   const footerLinks = [
     { text: 'API Docs', handler: () => alert('Coming soon!') },
-    { text: 'About', handler: () => alert('Coming soon!') },
+    { text: 'About', handler: onNavigateToAbout },
     { text: 'Terms', handler: onNavigateToTerms },
     { text: 'Privacy', handler: onNavigateToPrivacy },
     { text: 'Blog', handler: () => alert('Coming soon!') },
