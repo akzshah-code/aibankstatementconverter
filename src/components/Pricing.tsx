@@ -29,12 +29,14 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
 
     const plan = PLANS[planName];
     const isAnnual = planType === 'annual';
-    const amount = isAnnual ? plan.priceAnnual : plan.priceMonthly;
+    const baseAmount = isAnnual ? plan.priceAnnual : plan.priceMonthly;
+    const gst = baseAmount * 0.18;
+    const totalAmount = baseAmount + gst;
 
     const options = {
         key: 'rzp_test_ILzsdAlLClWEEN', // Public test key
-        amount: amount * 100, // Amount in paise
-        currency: "INR", // FIX: Changed from USD to INR to match test key
+        amount: Math.round(totalAmount * 100), // Amount in paise, rounded to nearest value
+        currency: "INR",
         name: "AI Statement Converter",
         description: `${plan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Plan`,
         handler: function (response: any) {
@@ -59,7 +61,6 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
 
     try {
         const rzp = new window.Razorpay(options);
-        // FIX: Add a specific failure handler for better error reporting
         rzp.on('payment.failed', function (response: any){
             console.error("Payment Failed:", response.error);
             alert(`Payment Failed: ${response.error.description || 'An unknown error occurred.'}\nCode: ${response.error.code}`);
@@ -148,10 +149,13 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
               <div key={plan.name} className={`border rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 ${user?.subscription.planName === plan.name ? 'border-primary' : 'border-gray-200'}`}>
                 <div className="text-left">
                     <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2 flex items-baseline">
-                      <span>₹{priceValue.toLocaleString('en-IN')}</span>
-                      <span className="text-base font-normal text-gray-500 ml-1">/{pricePeriod}</span>
-                    </p>
+                    <div className="mt-2">
+                        <p className="text-3xl font-bold text-gray-900 flex items-baseline">
+                          <span>₹{priceValue.toLocaleString('en-IN')}</span>
+                          <span className="text-base font-normal text-gray-500 ml-1">/{pricePeriod}</span>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">+ 18% GST applicable</p>
+                    </div>
                 </div>
                 
                 <div className="flex-grow" />
