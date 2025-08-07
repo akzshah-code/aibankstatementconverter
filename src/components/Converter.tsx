@@ -3,6 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
 
+interface RawTransactionFromAI {
+  date: string;
+  narration: string;
+  refNo?: string | null;
+  valueDate: string;
+  withdrawalAmt?: string | null;
+  depositAmt?: string | null;
+  closingBalance: string;
+}
+
 // --- Sub-components ---
 
 const StatCard: React.FC<{ value: string | number; label: string }> = ({ value, label }) => (
@@ -219,7 +229,7 @@ const Converter: React.FC = () => {
       const rawData = JSON.parse(jsonString);
       if (!Array.isArray(rawData)) throw new Error("The model did not return a valid array of transactions.");
       
-      const data: Transaction[] = rawData.map((item: any): Transaction => {
+      const data: Transaction[] = rawData.map((item: RawTransactionFromAI): Transaction => {
         // Robustly parse amounts, handling null, empty strings, and non-numeric values
         const parseNumber = (value: any): number | null => {
             if (value === null || value === undefined || value === '') return null;
@@ -248,9 +258,9 @@ const Converter: React.FC = () => {
         setExtractedData(data);
         setPageCount(Math.ceil(data.length / 25) || 1); // Estimate page count
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Conversion failed:", err);
-      const errorMessage = err?.message || 'An unknown error occurred during conversion.';
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred during conversion.';
       setError(`Conversion failed: ${errorMessage}`);
     } finally {
       setIsLoading(false);

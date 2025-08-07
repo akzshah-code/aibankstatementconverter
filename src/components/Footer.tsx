@@ -6,7 +6,7 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms }) => {
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, handler: () => void) => {
+  const handleLinkClick = (handler: () => void) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handler();
   };
@@ -24,7 +24,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms 
       <div className="container mx-auto px-6 py-8 text-center">
         <div className="flex justify-center space-x-6 mb-4">
           {footerLinks.map(link => (
-            <a key={link.text} href="#" onClick={(e) => handleLinkClick(e, link.handler)} className="text-gray-300 hover:text-primary transition-colors duration-300 cursor-pointer">
+            <a key={link.text} href="#" onClick={handleLinkClick(link.handler)} className="text-gray-300 hover:text-primary transition-colors duration-300 cursor-pointer">
               {link.text}
             </a>
           ))}

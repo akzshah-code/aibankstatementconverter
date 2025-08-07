@@ -17,7 +17,7 @@ const AdSlot: React.FC<AdSlotProps> = ({ id, width, height, isResponsive = false
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("AdSense error:", e);
       }
     }

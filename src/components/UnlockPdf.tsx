@@ -55,7 +55,7 @@ const UnlockPdf: React.FC = () => {
                 setUnlockedMessage('This PDF is not password protected.');
                 setStatus('unlocked');
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("PDF analysis failed:", err);
             reset();
             setError('Failed to read PDF. The file may be corrupted.');
@@ -85,9 +85,9 @@ const UnlockPdf: React.FC = () => {
       setStatus('unlocked');
       setPassword('');
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('password'); // Go back to password entry screen
-      if (err.name === 'PasswordIsIncorrectError' || (err.message && err.message.toLowerCase().includes('encrypted'))) {
+      if (err instanceof Error && (err.name === 'PasswordIsIncorrectError' || (err.message && err.message.toLowerCase().includes('encrypted')))) {
         setError('Incorrect password. If you are certain the password is correct, the file may use an encryption method that is not supported.');
       } else {
         console.error("PDF Unlock failed:", err);

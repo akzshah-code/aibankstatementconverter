@@ -52,8 +52,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
                 setChat(chatSession);
                 setMessages([{ role: 'model', text: "Understood. I have your transaction data and am ready to help you analyze it. What would you like to know?" }]);
 
-            } catch (err: any) {
-                setError(`Failed to initialize chat: ${err.message}`);
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                setError(`Failed to initialize chat: ${message}`);
                 console.error(err);
             }
         };
@@ -88,8 +89,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
                     return newMessages;
                 });
             }
-        } catch (err: any) {
-            const errorMessage = `Failed to get response: ${err.message}`;
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            const errorMessage = `Failed to get response: ${message}`;
             setError(errorMessage);
             setMessages(prev => [...prev, { role: 'model', text: `Sorry, I encountered an error. ${errorMessage}` }]);
         } finally {
