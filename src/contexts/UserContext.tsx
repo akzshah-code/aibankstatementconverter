@@ -4,9 +4,9 @@ import { User, Plan, Subscription, PlanName } from '../lib/types';
 // --- Hardcoded plan details ---
 export const PLANS: Record<PlanName, Plan> = {
   'Free': { name: 'Free', priceMonthly: 0, priceAnnual: 0, pagesPerMonth: 5 },
-  'Starter': { name: 'Starter', priceMonthly: 10, priceAnnual: 60, pagesPerMonth: 400 },
-  'Professional': { name: 'Professional', priceMonthly: 21, priceAnnual: 126, pagesPerMonth: 1000 },
-  'Business': { name: 'Business', priceMonthly: 35, priceAnnual: 210, pagesPerMonth: 4000 },
+  'Starter': { name: 'Starter', priceMonthly: 875, priceAnnual: 5250, pagesPerMonth: 400 },
+  'Professional': { name: 'Professional', priceMonthly: 1850, priceAnnual: 11100, pagesPerMonth: 1000 },
+  'Business': { name: 'Business', priceMonthly: 3100, priceAnnual: 18600, pagesPerMonth: 4000 },
 };
 
 // --- Context Type Definition ---
