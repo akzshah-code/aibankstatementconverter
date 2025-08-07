@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useUser, PLANS } from '../contexts/UserContext';
 import { PlanName } from '../lib/types';
@@ -27,6 +28,14 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
   const initiatePayment = useCallback((planName: PlanName) => {
     if (!user) return; // Guard: Should not be called without a user
 
+    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    if (!razorpayKey) {
+        const errorMessage = "Razorpay Key ID is not configured. Please set VITE_RAZORPAY_KEY_ID in your environment variables.";
+        console.error(errorMessage);
+        alert(errorMessage);
+        return;
+    }
+
     const plan = PLANS[planName];
     const isAnnual = planType === 'annual';
     const baseAmount = isAnnual ? plan.priceAnnual : plan.priceMonthly;
@@ -34,7 +43,7 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
     const totalAmount = baseAmount + gst;
 
     const options = {
-        key: 'rzp_test_ILzsdAlLClWEEN', // Public test key
+        key: razorpayKey,
         amount: Math.round(totalAmount * 100), // Amount in paise, rounded to nearest value
         currency: "INR",
         name: "AI Statement Converter",
@@ -52,6 +61,7 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
             color: "#4F46E5"
         },
         modal: {
+            backdropclose: false, // Prevent closing modal by clicking outside
             ondismiss: function() {
                 console.log("Checkout form closed by user.");
                 setPendingPurchase(null); // Clear pending state if user cancels
@@ -62,7 +72,7 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
     try {
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response: any){
-            console.error("Payment Failed:", response.error);
+            console.error("Full Payment Failure Response:", response);
             alert(`Payment Failed: ${response.error.description || 'An unknown error occurred.'}\nCode: ${response.error.code}`);
             setPendingPurchase(null); // Clear pending state on failure
         });
