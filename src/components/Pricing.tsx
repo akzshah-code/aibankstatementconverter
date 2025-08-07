@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUser, PLANS } from '../contexts/UserContext';
 import { PlanName } from '../lib/types';
 
@@ -22,25 +22,15 @@ const pricingPlansData: { name: PlanName | 'Enterprise' }[] = [
 
 const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
   const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
-  const { user, purchasePlan } = useUser();
+  const { user, purchasePlan, pendingPurchase, setPendingPurchase } = useUser();
 
-  const handlePurchase = (planName: PlanName | 'Enterprise') => {
-    if (!user) {
-        onNavigateToRegister();
-        return;
-    }
-
-    if (planName === 'Enterprise') {
-        alert('Please contact us for Enterprise pricing.');
-        return;
-    }
+  const initiatePayment = useCallback((planName: PlanName) => {
+    if (!user) return; // Guard: Should not be called without a user
 
     const plan = PLANS[planName];
     const isAnnual = planType === 'annual';
     const amount = isAnnual ? plan.priceAnnual : plan.priceMonthly;
 
-    // --- Razorpay Integration ---
-    // In a real app, the order_id would be created on your server
     const options = {
         key: 'rzp_test_ILzsdAlLClWEEN', // Public test key
         amount: amount * 100, // Amount in paise
@@ -48,8 +38,6 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
         name: "AI Statement Converter",
         description: `${plan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Plan`,
         handler: function (response: any) {
-            // This is a simulation. In a real app, you would verify
-            // response.razorpay_payment_id on your server.
             alert(`Payment successful! You've subscribed to the ${plan.name} plan.`);
             purchasePlan(planName, isAnnual);
         },
@@ -69,6 +57,30 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
         console.error("Razorpay error:", err);
         alert("Could not initialize payment. Please try again later.");
     }
+  }, [user, planType, purchasePlan]);
+
+  useEffect(() => {
+    if (user && pendingPurchase) {
+      initiatePayment(pendingPurchase);
+      setPendingPurchase(null);
+    }
+  }, [user, pendingPurchase, initiatePayment, setPendingPurchase]);
+
+  const handlePurchase = (planName: PlanName | 'Enterprise') => {
+    if (planName === 'Enterprise') {
+        alert('Please contact us for Enterprise pricing.');
+        return;
+    }
+    
+    if (!user) {
+        // User is not logged in. Store their intent and navigate.
+        setPendingPurchase(planName);
+        onNavigateToRegister();
+        return;
+    }
+
+    // User is logged in, initiate payment directly.
+    initiatePayment(planName);
   };
 
   return (
@@ -105,7 +117,7 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
                     <h3 className="text-xl font-bold text-gray-800">Enterprise</h3>
                     <p className="text-3xl font-bold text-gray-900 mt-2">Need More?</p>
                     <div className="flex-grow" />
-                     <a href="#" onClick={() => handlePurchase(planInfo.name)} className="block w-full text-center mt-8 py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300">
+                     <a href="#" onClick={(e) => { e.preventDefault(); handlePurchase(planInfo.name); }} className="block w-full text-center mt-8 py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300">
                         Contact Us
                     </a>
                   </div>

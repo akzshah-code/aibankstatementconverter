@@ -28,7 +28,7 @@ const LoadingSpinner: React.FC = () => (
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('main');
-  const { user, logout, loading } = useUser();
+  const { user, logout, loading, pendingPurchase } = useUser();
   const heroRef = useRef<HTMLElement>(null);
 
   const handleEnterDemo = () => setView('demo');
@@ -42,6 +42,14 @@ const App: React.FC = () => {
   const handleLogout = () => {
     logout();
     changeView('main');
+  };
+  
+  const handleLoginSuccess = () => {
+    if (pendingPurchase) {
+      changeView('pricing');
+    } else {
+      changeView('dashboard');
+    }
   };
 
   const navigateToMainPage = (andScrollToRef?: React.RefObject<HTMLElement>) => {
@@ -71,7 +79,7 @@ const App: React.FC = () => {
       case 'demo':
         return <DemoView onExitDemo={handleExitDemo} />;
       case 'login':
-        return <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={() => changeView('dashboard')} />;
+        return <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'register':
         return <Register onNavigateToLogin={() => changeView('login')} />;
       case 'unlock':
@@ -81,7 +89,7 @@ const App: React.FC = () => {
       case 'terms':
         return <TermsOfService />;
       case 'dashboard':
-        return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={() => changeView('dashboard')} />;
+        return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'main':
       default:
         return (

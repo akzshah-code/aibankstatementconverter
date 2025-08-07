@@ -20,6 +20,8 @@ interface UserContextType {
   recordConversion: (fileName: string, pages: number, status: 'Completed' | 'Failed') => boolean;
   checkAnonymousUsage: () => boolean;
   recordAnonymousUsage: () => void;
+  pendingPurchase: PlanName | null;
+  setPendingPurchase: (plan: PlanName | null) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -38,6 +40,7 @@ const db = {
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingPurchase, setPendingPurchase] = useState<PlanName | null>(null);
 
   useEffect(() => {
     // On initial load, check for a logged-in user from localStorage
@@ -73,6 +76,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     db.setLoggedInUser(null);
     setUser(null);
+    setPendingPurchase(null); // Clear pending purchase on logout
   };
 
   const register = (name: string, email: string): boolean => {
@@ -170,7 +174,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     db.setAnonymousUsage(usage);
   };
 
-  const value = { user, loading, login, logout, register, purchasePlan, recordConversion, checkAnonymousUsage, recordAnonymousUsage };
+  const value = { user, loading, login, logout, register, purchasePlan, recordConversion, checkAnonymousUsage, recordAnonymousUsage, pendingPurchase, setPendingPurchase };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
