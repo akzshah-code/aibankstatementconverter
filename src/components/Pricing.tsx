@@ -34,12 +34,13 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
     const options = {
         key: 'rzp_test_ILzsdAlLClWEEN', // Public test key
         amount: amount * 100, // Amount in paise
-        currency: "USD",
+        currency: "INR", // FIX: Changed from USD to INR to match test key
         name: "AI Statement Converter",
         description: `${plan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Plan`,
         handler: function (response: any) {
             alert(`Payment successful! You've subscribed to the ${plan.name} plan.`);
             purchasePlan(planName, isAnnual);
+            setPendingPurchase(null); // Clear pending state on success
         },
         prefill: {
             name: user.name,
@@ -47,24 +48,38 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
         },
         theme: {
             color: "#4F46E5"
+        },
+        modal: {
+            ondismiss: function() {
+                console.log("Checkout form closed by user.");
+                setPendingPurchase(null); // Clear pending state if user cancels
+            }
         }
     };
 
     try {
         const rzp = new window.Razorpay(options);
+        // FIX: Add a specific failure handler for better error reporting
+        rzp.on('payment.failed', function (response: any){
+            console.error("Payment Failed:", response.error);
+            alert(`Payment Failed: ${response.error.description || 'An unknown error occurred.'}\nCode: ${response.error.code}`);
+            setPendingPurchase(null); // Clear pending state on failure
+        });
         rzp.open();
     } catch(err: unknown) {
         console.error("Razorpay error:", err);
-        alert("Could not initialize payment. Please try again later.");
+        alert("Could not initialize payment. Please check your connection and try again.");
+        setPendingPurchase(null);
     }
-  }, [user, planType, purchasePlan]);
+  }, [user, planType, purchasePlan, setPendingPurchase]);
 
   useEffect(() => {
+    // This effect handles the case where a user logs in with a pending purchase
     if (user && pendingPurchase) {
       initiatePayment(pendingPurchase);
-      setPendingPurchase(null);
+      // Pending purchase is now cleared by the payment modal's outcomes (success, fail, dismiss)
     }
-  }, [user, pendingPurchase, initiatePayment, setPendingPurchase]);
+  }, [user, pendingPurchase, initiatePayment]);
 
   const handlePurchase = (planName: PlanName | 'Enterprise') => {
     if (planName === 'Enterprise') {
@@ -126,7 +141,8 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
 
             const plan = PLANS[planInfo.name as PlanName];
             const isAnnual = planType === 'annual';
-            const price = isAnnual ? `$${plan.priceAnnual} / year` : `$${plan.priceMonthly} / month`;
+            // FIX: Changed currency symbol from $ to ₹
+            const price = isAnnual ? `₹${plan.priceAnnual} / year` : `₹${plan.priceMonthly} / month`;
             
             return (
               <div key={plan.name} className={`border rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 ${user?.subscription.planName === plan.name ? 'border-primary' : 'border-gray-200'}`}>
