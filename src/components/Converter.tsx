@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
+import { PDFDocument } from 'pdf-lib';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
+import { useUser } from '../contexts/UserContext';
 
 interface RawTransactionFromAI {
   date: string;
@@ -111,6 +113,8 @@ const Converter: React.FC = () => {
   const [showChat, setShowChat] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { user, recordConversion, checkAnonymousUsage, recordAnonymousUsage } = useUser();
+
   const handleFileSelection = useCallback((selectedFile: File | null) => {
     if (selectedFile) {
       if (
@@ -169,10 +173,42 @@ const Converter: React.FC = () => {
     setExtractedData(null);
     const startTime = Date.now();
 
+    // Determine page count and check quota
+    let docPageCount = 1;
+    if (file.type === 'application/pdf') {
+        try {
+            const fileBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+            docPageCount = pdfDoc.getPageCount();
+        } catch (err: unknown) {
+             setError('Could not read the PDF to determine page count. It may be corrupted or encrypted.');
+             setIsLoading(false);
+             return;
+        }
+    }
+    setPageCount(docPageCount);
+
+    // Check user quota
+    if (user) {
+        const remainingPages = user.subscription.pagesQuota - user.subscription.pagesUsed;
+        if (docPageCount > remainingPages) {
+            setError(`You do not have enough page credits. This document has ${docPageCount} pages, but you only have ${remainingPages} remaining.`);
+            setIsLoading(false);
+            return;
+        }
+    } else {
+        if (!checkAnonymousUsage()) {
+            setError('You have reached your daily limit for anonymous conversions (1 page/day). Please register for a free account to convert more.');
+            setIsLoading(false);
+            return;
+        }
+    }
+
     try {
-      const apiKey = import.meta.env.VITE_API_KEY;
-      if (!apiKey) throw new Error("VITE_API_KEY environment variable not set. Please configure it in your deployment settings.");
-      const ai = new GoogleGenAI({ apiKey });
+      if (!process.env.API_KEY) {
+        throw new Error("API_KEY environment variable not set. Please configure it in your deployment settings.");
+      }
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const base64Data = await fileToBase64(file);
 
       const filePart = { inlineData: { mimeType: file.type, data: base64Data } };
@@ -230,10 +266,9 @@ const Converter: React.FC = () => {
       if (!Array.isArray(rawData)) throw new Error("The model did not return a valid array of transactions.");
       
       const data: Transaction[] = rawData.map((item: RawTransactionFromAI): Transaction => {
-        // Robustly parse amounts, handling null, empty strings, and non-numeric values
         const parseNumber = (value: any): number | null => {
             if (value === null || value === undefined || value === '') return null;
-            const num = parseFloat(String(value).replace(/,/g, '')); // Handle commas in numbers
+            const num = parseFloat(String(value).replace(/,/g, ''));
             return isNaN(num) ? null : num;
         };
         
@@ -244,7 +279,6 @@ const Converter: React.FC = () => {
           valueDate: String(item.valueDate || item.date || ''),
           withdrawalAmt: parseNumber(item.withdrawalAmt),
           depositAmt: parseNumber(item.depositAmt),
-          // Ensure closing balance is always a number, defaulting to 0
           closingBalance: parseNumber(item.closingBalance) ?? 0,
         };
       });
@@ -254,14 +288,20 @@ const Converter: React.FC = () => {
       
       if (data.length === 0) {
         setError("No transactions could be extracted. Please check the document or try another file.");
+        if(user) recordConversion(file.name, docPageCount, 'Failed');
       } else {
         setExtractedData(data);
-        setPageCount(Math.ceil(data.length / 25) || 1); // Estimate page count
+        if (user) {
+            recordConversion(file.name, docPageCount, 'Completed');
+        } else {
+            recordAnonymousUsage();
+        }
       }
     } catch (err: unknown) {
       console.error("Conversion failed:", err);
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred during conversion.';
       setError(`Conversion failed: ${errorMessage}`);
+      if(user) recordConversion(file.name, docPageCount, 'Failed');
     } finally {
       setIsLoading(false);
     }
@@ -355,7 +395,7 @@ const Converter: React.FC = () => {
       {/* --- Status / Results Section --- */}
       {error && (
           <div className="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
-            <h3 className="text-lg font-bold text-red-700">Conversion Failed</h3>
+            <h3 className="text-lg font-bold text-red-700">Action Required</h3>
             <p className="text-sm text-red-600 mt-1">{error}</p>
             <button onClick={resetConverter} className="mt-4 bg-primary text-white px-5 py-2 rounded-md font-semibold hover:bg-primary-hover transition-colors text-sm">
               Try Again
@@ -371,7 +411,7 @@ const Converter: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard value={extractedData.length} label="Transactions" />
-            <StatCard value={pageCount ?? 'N/A'} label="Pages" />
+            <StatCard value={pageCount ?? 'N/A'} label="Pages Processed" />
             <StatCard value={processingTime ? `${processingTime.toFixed(1)}s` : 'N/A'} label="Processing Time" />
           </div>
 

@@ -14,7 +14,7 @@ const UsageTiers: React.FC<UsageTiersProps> = ({ onNavigateToPricing, onNavigate
 
   const handleSubscribeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    onNavigateToRegister();
+    onNavigateToPricing();
   };
 
   return (
@@ -63,11 +63,11 @@ const UsageTiers: React.FC<UsageTiersProps> = ({ onNavigateToPricing, onNavigate
           <div className="border border-gray-200 rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
             <div className="flex-grow">
               <h3 className="text-xl font-bold text-gray-800">Subscribe</h3>
-              <p className="text-gray-600 mt-2 min-h-[72px]">Subscribe to convert more documents</p>
+              <p className="text-gray-600 mt-2 min-h-[72px]">Subscribe for up to 4,000 pages/month, conversion history, and more.</p>
             </div>
             <div className="mt-auto pt-4 border-t border-gray-100 flex justify-end items-end">
-              <a href="#register" onClick={handleSubscribeClick} className="text-primary hover:underline font-semibold">
-                Register
+              <a href="#pricing" onClick={handleSubscribeClick} className="bg-primary text-white font-semibold px-5 py-2 rounded-md hover:bg-primary-hover transition-colors">
+                View Plans
               </a>
             </div>
           </div>

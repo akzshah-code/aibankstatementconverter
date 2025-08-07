@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import { useUser } from '../contexts/UserContext';
 
 type Status = 'idle' | 'analyzing' | 'password' | 'loading' | 'unlocked';
 
@@ -12,6 +13,7 @@ const UnlockPdf: React.FC = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [unlockedMessage, setUnlockedMessage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, recordConversion, checkAnonymousUsage, recordAnonymousUsage } = useUser();
 
   const reset = useCallback((keepFile: boolean = false) => {
     if (!keepFile) {
@@ -39,6 +41,21 @@ const UnlockPdf: React.FC = () => {
             return;
         }
 
+        // Check user quota (unlocking costs 1 page credit)
+        const pageCost = 1;
+        if (user) {
+            const remainingPages = user.subscription.pagesQuota - user.subscription.pagesUsed;
+            if (pageCost > remainingPages) {
+                setError(`You do not have enough page credits to unlock a file. This action requires ${pageCost} credit, but you only have ${remainingPages} remaining.`);
+                return;
+            }
+        } else {
+            if (!checkAnonymousUsage()) {
+                setError('You have reached your daily limit for anonymous actions (1/day). Please register for a free account to unlock more files.');
+                return;
+            }
+        }
+
         setFile(selectedFile);
         setStatus('analyzing');
 
@@ -49,6 +66,9 @@ const UnlockPdf: React.FC = () => {
             if (pdfDoc.isEncrypted) {
                 setStatus('password');
             } else {
+                if (user) recordConversion(selectedFile.name, pageCost, 'Completed');
+                else recordAnonymousUsage();
+
                 const unlockedPdfBytes = await pdfDoc.save();
                 const unlockedFile = new File([unlockedPdfBytes], selectedFile.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
                 setFile(unlockedFile);
@@ -61,7 +81,7 @@ const UnlockPdf: React.FC = () => {
             setError('Failed to read PDF. The file may be corrupted.');
         }
     }
-  }, [reset]);
+  }, [reset, user, checkAnonymousUsage, recordConversion, recordAnonymousUsage]);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +99,10 @@ const UnlockPdf: React.FC = () => {
       
       const unlockedPdfBytes = await pdfDoc.save();
       const unlockedFile = new File([unlockedPdfBytes], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
+      
+      const pageCost = 1;
+      if (user) recordConversion(file.name, pageCost, 'Completed');
+      else recordAnonymousUsage();
       
       setFile(unlockedFile);
       setUnlockedMessage('PDF Unlocked Successfully!');
@@ -183,13 +207,10 @@ const UnlockPdf: React.FC = () => {
             }`;
             return (
               <div className="max-w-md mx-auto bg-white rounded-xl p-8 border border-gray-200 shadow-lg animate-fade-in">
-                  <h3 className="text-2xl font-bold text-gray-800 text-left">Some files require password</h3>
-                  <input
-                    type="text"
-                    readOnly
-                    value={file?.name || ''}
-                    className="w-full mt-4 mb-6 p-3 bg-gray-100 border border-gray-200 rounded-md text-gray-600 truncate"
-                  />
+                  <h3 className="text-2xl font-bold text-gray-800 text-left">Password Required</h3>
+                   {error && <p id="password-error" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
+                  <p className="text-sm text-gray-600 mt-2 mb-4">This file is encrypted. Please enter the password to unlock it.</p>
+                  
                   <form onSubmit={handleUnlock} className="space-y-4">
                       <div>
                           <div className="relative">
@@ -213,30 +234,28 @@ const UnlockPdf: React.FC = () => {
                                   <button
                                       type="button"
                                       onClick={() => setShowPassword(!showPassword)}
-                                      className="h-full px-4 text-white bg-gray-600 rounded-r-md hover:bg-gray-700 flex items-center justify-center focus:outline-none"
+                                      className="h-full px-4 text-gray-600 rounded-r-md hover:bg-gray-100 flex items-center justify-center focus:outline-none"
                                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                                   >
                                       <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                   </button>
                               </div>
                           </div>
-                          {error && <p id="password-error" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
+                         
                       </div>
                       
                       <div className="flex justify-end pt-2">
+                           <button onClick={() => reset()} type="button" className="text-sm text-gray-600 hover:text-primary font-semibold mr-4">
+                              Cancel
+                          </button>
                           <button 
                               type="submit"
-                              className="bg-red-600 text-white font-bold py-2.5 px-8 rounded-lg hover:bg-red-700 transition-colors duration-300 shadow-md hover:shadow-lg"
+                              className="bg-primary text-white font-bold py-2.5 px-8 rounded-lg hover:bg-primary-hover transition-colors duration-300 shadow-md hover:shadow-lg"
                           >
-                              Send
+                              Unlock
                           </button>
                       </div>
                   </form>
-                  <div className="text-center mt-6">
-                      <button onClick={() => reset()} className="text-sm text-gray-600 hover:text-primary font-semibold">
-                          Cancel and choose a different file
-                      </button>
-                  </div>
               </div>
             );
           case 'idle':
@@ -277,7 +296,7 @@ const UnlockPdf: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Unlock Encrypted PDFs</h2>
           <p className="text-lg text-secondary mb-4">
-            Remove passwords from your PDF files securely in your browser. Your files never leave your computer.
+            Remove passwords from your PDF files securely in your browser. Your files never leave your computer. Unlocking costs 1 page credit.
           </p>
           <p className="text-xs text-gray-500 italic mb-10">
             By using this tool, you confirm that you have the legal right to access and decrypt this file.

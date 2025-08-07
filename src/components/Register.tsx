@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
+import { useUser } from '../contexts/UserContext';
 
 interface RegisterProps {
   onNavigateToLogin: () => void;
 }
 
 const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
+  const { register } = useUser();
   const [isRegistered, setIsRegistered] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // In a real app, you would handle registration logic here.
-    // On success:
-    setIsRegistered(true);
-    setTimeout(() => {
-      onNavigateToLogin();
-    }, 3000); // Redirect after 3 seconds
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    // NOTE: Password is not stored or used in this simulation.
+
+    const success = register(name, email);
+
+    if (success) {
+      setIsRegistered(true);
+      setTimeout(() => {
+        onNavigateToLogin();
+      }, 3000);
+    } else {
+      setError('An account with this email already exists.');
+    }
   };
   
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, handler: () => void) => {
@@ -32,7 +45,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
             </div>
             <h2 className="text-3xl font-bold text-gray-900">Registration Successful!</h2>
             <p className="text-secondary mt-2">
-              Your account has been created. You will be redirected to the login page shortly.
+              Your account has been created with a Free plan. Redirecting to login...
             </p>
           </div>
         ) : (
@@ -41,6 +54,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigateToLogin }) => {
               <h2 className="text-3xl font-bold text-gray-900">Create an Account</h2>
               <p className="text-secondary mt-2">Get started by creating your free account.</p>
             </div>
+            {error && <p className="text-red-500 text-center text-sm mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">

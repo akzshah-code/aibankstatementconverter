@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
+import { User } from '../lib/types';
 
 interface HeaderProps {
+  user: User | null;
+  onLogout: () => void;
   onShowPricingPage: () => void;
   onNavigateToLogin: () => void;
   onNavigateToRegister: () => void;
   onNavigateToUnlock: () => void;
   onNavigateToConvert: () => void;
   onNavigateHome: () => void;
+  onNavigateToDashboard: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
-  onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToUnlock, onNavigateToConvert, onNavigateHome
+  user, onLogout, onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToUnlock, onNavigateToConvert, onNavigateHome, onNavigateToDashboard
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Helper to wrap navigation functions to also close the menu
   const handleLinkClick = (handler: () => void) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handler();
@@ -40,20 +43,36 @@ const Header: React.FC<HeaderProps> = ({
           <a href="#pricing" onClick={handleLinkClick(onShowPricingPage)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
             Pricing
           </a>
-          <a href="#login" onClick={handleLinkClick(onNavigateToLogin)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
-            Login
-          </a>
+          {user ? (
+              <a href="#dashboard" onClick={handleLinkClick(onNavigateToDashboard)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
+                Dashboard
+              </a>
+          ) : (
+              <a href="#login" onClick={handleLinkClick(onNavigateToLogin)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
+                Login
+              </a>
+          )}
         </div>
         
         <div className="flex items-center">
-           {/* Desktop Register Button */}
-           <a 
-             href="#register"
-             onClick={handleLinkClick(onNavigateToRegister)}
-             className="hidden md:inline-block px-6 py-2.5 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300 transform hover:scale-105"
-           >
-              Register
-           </a>
+           {/* Desktop Auth Buttons */}
+           {user ? (
+               <a 
+                 href="#"
+                 onClick={handleLinkClick(onLogout)}
+                 className="hidden md:inline-block px-6 py-2.5 bg-gray-600 text-white rounded-md font-semibold hover:bg-gray-700 transition-colors duration-300"
+               >
+                  Logout
+               </a>
+           ) : (
+               <a 
+                 href="#register"
+                 onClick={handleLinkClick(onNavigateToRegister)}
+                 className="hidden md:inline-block px-6 py-2.5 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300 transform hover:scale-105"
+               >
+                  Register
+               </a>
+           )}
            
            {/* Mobile Menu Toggle */}
            <div className="md:hidden ml-4">
@@ -71,14 +90,29 @@ const Header: React.FC<HeaderProps> = ({
               <a href="#convert" onClick={handleLinkClick(onNavigateToConvert)} className="text-gray-600 hover:text-primary font-medium">Convert</a>
               <a href="#unlock" onClick={handleLinkClick(onNavigateToUnlock)} className="text-gray-600 hover:text-primary font-medium">Unlock PDF</a>
               <a href="#pricing" onClick={handleLinkClick(onShowPricingPage)} className="text-gray-600 hover:text-primary font-medium">Pricing</a>
-              <a href="#login" onClick={handleLinkClick(onNavigateToLogin)} className="text-gray-600 hover:text-primary font-medium">Login</a>
-              <a 
-                href="#register"
-                onClick={handleLinkClick(onNavigateToRegister)}
-                className="w-full text-center px-6 py-2.5 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300"
-              >
-                Register
-              </a>
+              {user ? (
+                 <>
+                  <a href="#dashboard" onClick={handleLinkClick(onNavigateToDashboard)} className="text-gray-600 hover:text-primary font-medium">Dashboard</a>
+                  <a 
+                    href="#"
+                    onClick={handleLinkClick(onLogout)}
+                    className="w-full text-center px-6 py-2.5 bg-gray-600 text-white rounded-md font-semibold hover:bg-gray-700 transition-colors duration-300"
+                  >
+                    Logout
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a href="#login" onClick={handleLinkClick(onNavigateToLogin)} className="text-gray-600 hover:text-primary font-medium">Login</a>
+                  <a 
+                    href="#register"
+                    onClick={handleLinkClick(onNavigateToRegister)}
+                    className="w-full text-center px-6 py-2.5 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300"
+                  >
+                    Register
+                  </a>
+                </>
+              )}
           </div>
         </div>
       </div>

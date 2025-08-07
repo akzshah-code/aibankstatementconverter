@@ -6,6 +6,7 @@ import UsageTiers from './components/UsageTiers';
 import Features from './components/Features';
 import BankSupport from './components/BankSupport';
 import Footer from './components/Footer';
+import { useUser } from './contexts/UserContext';
 
 // Lazy load components for different views to enable code-splitting
 const Pricing = lazy(() => import('./components/Pricing'));
@@ -15,8 +16,9 @@ const Register = lazy(() => import('./components/Register'));
 const UnlockPdf = lazy(() => import('./components/UnlockPdf'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
 
-type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock' | 'privacy' | 'terms';
+type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock' | 'privacy' | 'terms' | 'dashboard';
 
 const LoadingSpinner: React.FC = () => (
     <div className="flex justify-center items-center py-20 min-h-[calc(100vh-160px)]">
@@ -26,45 +28,25 @@ const LoadingSpinner: React.FC = () => (
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('main');
+  const { user, logout, loading } = useUser();
   const heroRef = useRef<HTMLElement>(null);
 
   const handleEnterDemo = () => setView('demo');
   const handleExitDemo = () => setView('main');
 
-  const showLoginPage = () => {
-    setView('login');
+  const changeView = (newView: View) => {
+    setView(newView);
     window.scrollTo(0, 0);
   };
-
-  const showRegisterPage = () => {
-    setView('register');
-    window.scrollTo(0, 0);
-  };
-
-  const showPricingPage = () => {
-    setView('pricing');
-    window.scrollTo(0, 0);
-  };
-
-  const showUnlockPage = () => {
-    setView('unlock');
-    window.scrollTo(0, 0);
-  };
-
-  const showPrivacyPage = () => {
-    setView('privacy');
-    window.scrollTo(0, 0);
-  };
-
-  const showTermsPage = () => {
-    setView('terms');
-    window.scrollTo(0, 0);
+  
+  const handleLogout = () => {
+    logout();
+    changeView('main');
   };
 
   const navigateToMainPage = (andScrollToRef?: React.RefObject<HTMLElement>) => {
     if (view !== 'main') {
       setView('main');
-      // Use timeout to allow the main view to render before scrolling
       setTimeout(() => {
         if (andScrollToRef?.current) {
           andScrollToRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -73,7 +55,6 @@ const App: React.FC = () => {
         }
       }, 50);
     } else if (andScrollToRef?.current) {
-      // Already on main page, just scroll
       andScrollToRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       window.scrollTo(0, 0);
@@ -81,27 +62,32 @@ const App: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (loading) {
+      return <LoadingSpinner />;
+    }
     switch (view) {
       case 'pricing':
-        return <Pricing />;
+        return <Pricing onNavigateToRegister={() => changeView('register')} />;
       case 'demo':
         return <DemoView onExitDemo={handleExitDemo} />;
       case 'login':
-        return <Login onNavigateToRegister={showRegisterPage} />;
+        return <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={() => changeView('dashboard')} />;
       case 'register':
-        return <Register onNavigateToLogin={showLoginPage} />;
+        return <Register onNavigateToLogin={() => changeView('login')} />;
       case 'unlock':
         return <UnlockPdf />;
       case 'privacy':
         return <PrivacyPolicy />;
       case 'terms':
         return <TermsOfService />;
+      case 'dashboard':
+        return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={() => changeView('dashboard')} />;
       case 'main':
       default:
         return (
           <>
             <Hero ref={heroRef} onTryDemo={handleEnterDemo} />
-            <UsageTiers onNavigateToPricing={showPricingPage} onNavigateToRegister={showRegisterPage} />
+            <UsageTiers onNavigateToPricing={() => changeView('pricing')} onNavigateToRegister={() => changeView('register')} />
             <Features />
             <section className="py-8 bg-gray-50 flex justify-center">
               <AdSlot id="ad-rect" width={300} height={250} />
@@ -118,10 +104,13 @@ const App: React.FC = () => {
   return (
     <div className="bg-white text-gray-800 font-sans">
       <Header
-        onShowPricingPage={showPricingPage}
-        onNavigateToLogin={showLoginPage}
-        onNavigateToRegister={showRegisterPage}
-        onNavigateToUnlock={showUnlockPage}
+        user={user}
+        onLogout={handleLogout}
+        onShowPricingPage={() => changeView('pricing')}
+        onNavigateToLogin={() => changeView('login')}
+        onNavigateToRegister={() => changeView('register')}
+        onNavigateToUnlock={() => changeView('unlock')}
+        onNavigateToDashboard={() => changeView('dashboard')}
         onNavigateToConvert={() => navigateToMainPage(heroRef)}
         onNavigateHome={() => navigateToMainPage()}
       />
@@ -130,7 +119,7 @@ const App: React.FC = () => {
           {renderContent()}
         </Suspense>
       </main>
-      <Footer onNavigateToPrivacy={showPrivacyPage} onNavigateToTerms={showTermsPage} />
+      <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} />
     </div>
   );
 };

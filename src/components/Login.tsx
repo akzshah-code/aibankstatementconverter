@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useUser } from '../contexts/UserContext';
 
 interface LoginProps {
   onNavigateToRegister: () => void;
+  onLoginSuccess: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onNavigateToRegister }) => {
+const Login: React.FC<LoginProps> = ({ onNavigateToRegister, onLoginSuccess }) => {
+  const { login } = useUser();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would handle login logic here.
-    alert('Login functionality not implemented yet.');
+    setError(null);
+    // NOTE: Password is not checked in this simulation.
+    const success = login(email);
+    if (success) {
+      onLoginSuccess();
+    } else {
+      setError('No account found with this email address.');
+    }
   };
 
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>, handler: () => void) => {
@@ -23,6 +36,7 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister }) => {
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back!</h2>
           <p className="text-secondary mt-2">Login to access your account.</p>
         </div>
+        {error && <p className="text-red-500 text-center text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -34,6 +48,8 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister }) => {
               name="email"
               autoComplete="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="you@example.com"
             />
@@ -48,6 +64,8 @@ const Login: React.FC<LoginProps> = ({ onNavigateToRegister }) => {
               name="password"
               autoComplete="current-password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="••••••••"
             />

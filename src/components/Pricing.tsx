@@ -1,35 +1,75 @@
 import React, { useState } from 'react';
+import { useUser, PLANS } from '../contexts/UserContext';
+import { PlanName } from '../lib/types';
 
-type PlanType = 'monthly' | 'annual';
+// Augment window interface for Razorpay
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
-const pricingPlansData = [
-    {
-        name: 'Starter',
-        monthly: { price: '$10 / month', pages: '400 pages / month' },
-        annual: { price: '$60 / year', pages: '4800 pages / year' },
-        buttonText: 'Buy',
-    },
-    {
-        name: 'Professional',
-        monthly: { price: '$21 / month', pages: '1000 pages / month' },
-        annual: { price: '$126 / year', pages: '12000 pages / year' },
-        buttonText: 'Buy',
-    },
-    {
-        name: 'Business',
-        monthly: { price: '$35 / month', pages: '4000 pages / month' },
-        annual: { price: '$210 / year', pages: '48000 pages / year' },
-        buttonText: 'Buy',
-    },
-    {
-        name: 'Enterprise',
-        description: 'Need More?',
-        buttonText: 'Contact',
-    },
+interface PricingProps {
+    onNavigateToRegister: () => void;
+}
+
+const pricingPlansData: { name: PlanName | 'Enterprise' }[] = [
+    { name: 'Starter' },
+    { name: 'Professional' },
+    { name: 'Business' },
+    { name: 'Enterprise' },
 ];
 
-const Pricing: React.FC = () => {
-  const [planType, setPlanType] = useState<PlanType>('monthly');
+const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
+  const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
+  const { user, purchasePlan } = useUser();
+
+  const handlePurchase = (planName: PlanName | 'Enterprise') => {
+    if (!user) {
+        onNavigateToRegister();
+        return;
+    }
+
+    if (planName === 'Enterprise') {
+        alert('Please contact us for Enterprise pricing.');
+        return;
+    }
+
+    const plan = PLANS[planName];
+    const isAnnual = planType === 'annual';
+    const amount = isAnnual ? plan.priceAnnual : plan.priceMonthly;
+
+    // --- Razorpay Integration ---
+    // In a real app, the order_id would be created on your server
+    const options = {
+        key: 'rzp_test_ILzsdAlLClWEEN', // Public test key
+        amount: amount * 100, // Amount in paise
+        currency: "USD",
+        name: "AI Statement Converter",
+        description: `${plan.name} - ${isAnnual ? 'Annual' : 'Monthly'} Plan`,
+        handler: function (response: any) {
+            // This is a simulation. In a real app, you would verify
+            // response.razorpay_payment_id on your server.
+            alert(`Payment successful! You've subscribed to the ${plan.name} plan.`);
+            purchasePlan(planName, isAnnual);
+        },
+        prefill: {
+            name: user.name,
+            email: user.email,
+        },
+        theme: {
+            color: "#4F46E5"
+        }
+    };
+
+    try {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    } catch(err: unknown) {
+        console.error("Razorpay error:", err);
+        alert("Could not initialize payment. Please try again later.");
+    }
+  };
 
   return (
     <section id="pricing" className="bg-white py-20">
@@ -39,7 +79,7 @@ const Pricing: React.FC = () => {
             <button
                 onClick={() => setPlanType('monthly')}
                 className={`px-6 py-2 rounded-lg font-semibold border-2 transition-all duration-200 ${
-                    planType === 'monthly' ? 'border-primary bg-white text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
+                    planType === 'monthly' ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
                 aria-pressed={planType === 'monthly'}
             >
@@ -48,43 +88,56 @@ const Pricing: React.FC = () => {
             <button
                 onClick={() => setPlanType('annual')}
                 className={`px-6 py-2 rounded-lg font-semibold border-2 transition-all duration-200 ${
-                    planType === 'annual' ? 'border-primary bg-white text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
+                    planType === 'annual' ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
                 aria-pressed={planType === 'annual'}
             >
                 Annual Plan
             </button>
-            <span className="text-gray-800 font-medium hidden sm:inline">Save more yearly!</span>
+            <span className="text-gray-800 font-medium hidden sm:inline">Save up to 50% yearly!</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {pricingPlansData.map((plan) => {
-            const isEnterprise = plan.name === 'Enterprise';
-            const displayData = isEnterprise ? { price: plan.description, pages: null } : plan[planType];
+          {pricingPlansData.map((planInfo) => {
+            if (planInfo.name === 'Enterprise') {
+                return (
+                  <div key={planInfo.name} className="border border-gray-200 rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+                    <h3 className="text-xl font-bold text-gray-800">Enterprise</h3>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">Need More?</p>
+                    <div className="flex-grow" />
+                     <a href="#" onClick={() => handlePurchase(planInfo.name)} className="block w-full text-center mt-8 py-3 bg-primary text-white rounded-md font-semibold hover:bg-primary-hover transition-colors duration-300">
+                        Contact Us
+                    </a>
+                  </div>
+                );
+            }
 
+            const plan = PLANS[planInfo.name as PlanName];
+            const isAnnual = planType === 'annual';
+            const price = isAnnual ? `$${plan.priceAnnual} / year` : `$${plan.priceMonthly} / month`;
+            
             return (
-              <div key={plan.name} className="border border-gray-200 rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div key={plan.name} className={`border rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 ${user?.subscription.planName === plan.name ? 'border-primary' : 'border-gray-200'}`}>
                 <div className="text-left">
                     <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{displayData.price}</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{price}</p>
                 </div>
                 
                 <div className="flex-grow" />
 
                 <div className="mt-8">
-                    <a 
-                      href="#" 
-                      className="block w-full py-3 bg-primary text-white rounded-md font-semibold text-center hover:bg-primary-hover transition-colors duration-300"
+                    <button
+                      onClick={() => handlePurchase(plan.name)}
+                      className="block w-full py-3 bg-primary text-white rounded-md font-semibold text-center hover:bg-primary-hover transition-colors duration-300 disabled:bg-gray-400"
+                      disabled={user?.subscription.planName === plan.name}
                     >
-                      {plan.buttonText}
-                    </a>
+                      {user?.subscription.planName === plan.name ? 'Current Plan' : (user ? 'Upgrade' : 'Get Started')}
+                    </button>
                     <div className="mt-6 min-h-[24px]">
-                        {displayData.pages && (
-                            <p className="flex items-center text-gray-600">
-                                <i className="fas fa-check text-green-500 mr-3"></i>
-                                {displayData.pages}
-                            </p>
-                        )}
+                        <p className="flex items-center text-gray-600">
+                            <i className="fas fa-check text-green-500 mr-3"></i>
+                            {plan.pagesPerMonth} pages / month
+                        </p>
                     </div>
                 </div>
               </div>
