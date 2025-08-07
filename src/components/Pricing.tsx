@@ -141,14 +141,17 @@ const Pricing: React.FC<PricingProps> = ({ onNavigateToRegister }) => {
 
             const plan = PLANS[planInfo.name as PlanName];
             const isAnnual = planType === 'annual';
-            // FIX: Changed currency symbol from $ to ₹
-            const price = isAnnual ? `₹${plan.priceAnnual} / year` : `₹${plan.priceMonthly} / month`;
+            const priceValue = isAnnual ? plan.priceAnnual : plan.priceMonthly;
+            const pricePeriod = isAnnual ? 'year' : 'month';
             
             return (
               <div key={plan.name} className={`border rounded-xl p-6 flex flex-col bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 ${user?.subscription.planName === plan.name ? 'border-primary' : 'border-gray-200'}`}>
                 <div className="text-left">
                     <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{price}</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2 flex items-baseline">
+                      <span>₹{priceValue.toLocaleString('en-IN')}</span>
+                      <span className="text-base font-normal text-gray-500 ml-1">/{pricePeriod}</span>
+                    </p>
                 </div>
                 
                 <div className="flex-grow" />
