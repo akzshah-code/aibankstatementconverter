@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Chat } from "@google/genai";
 import { Transaction } from '../lib/types';
 
 interface ChatInterfaceProps {
@@ -12,8 +12,7 @@ interface Message {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
-    const [chat, setChat] = useState<Chat | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([{ role: 'model', text: "I have your transaction data. What would you like to know?" }]);
     const [userInput, setUserInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -25,48 +24,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
 
     useEffect(scrollToBottom, [messages]);
 
-    useEffect(() => {
-        const initChat = async () => {
-            try {
-                if (!process.env.API_KEY) {
-                    throw new Error("API_KEY environment variable not set.");
-                }
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-                
-                const initialHistory = [
-                    {
-                        role: 'user' as const,
-                        parts: [{ text: `You are a helpful financial assistant. The following is a JSON object containing a user's bank transaction data. Your task is to answer questions based *only* on this data. Do not make up information. If a question cannot be answered from the data, say so. Be concise and clear. The data is:\n\n${JSON.stringify(transactions, null, 2)}` }]
-                    },
-                    {
-                        role: 'model' as const,
-                        parts: [{ text: "Understood. I have your transaction data and am ready to help you analyze it. What would you like to know?" }]
-                    }
-                ];
-
-                const chatSession = ai.chats.create({
-                    model: 'gemini-2.5-flash',
-                    history: initialHistory,
-                });
-
-                setChat(chatSession);
-                setMessages([{ role: 'model', text: "Understood. I have your transaction data and am ready to help you analyze it. What would you like to know?" }]);
-
-            } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err);
-                setError(`Failed to initialize chat: ${message}`);
-                console.error(err);
-            }
-        };
-
-        if (transactions.length > 0) {
-            initChat();
-        }
-    }, [transactions]);
-
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!userInput.trim() || !chat || isLoading) return;
+        if (!userInput.trim() || isLoading) return;
 
         const userMessage: Message = { role: 'user', text: userInput };
         setMessages(prev => [...prev, userMessage]);
@@ -76,19 +36,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
         setError(null);
         
         try {
-            const stream = await chat.sendMessageStream({ message: currentInput });
-            
-            let modelResponse = '';
-            setMessages(prev => [...prev, { role: 'model', text: '' }]);
+            const response = await fetch('http://localhost:3001/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    transactions: transactions,
+                    message: currentInput,
+                }),
+            });
 
-            for await (const chunk of stream) {
-                modelResponse += chunk.text;
-                setMessages(prev => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1].text = modelResponse;
-                    return newMessages;
-                });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'The server returned an error.');
             }
+
+            const data = await response.json();
+            const modelMessage: Message = { role: 'model', text: data.response };
+            setMessages(prev => [...prev, modelMessage]);
+
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
             const errorMessage = `Failed to get response: ${message}`;
@@ -98,14 +65,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
             setIsLoading(false);
         }
     };
-
-    if (!chat && !error) {
-        return (
-            <div className="p-4 border rounded-lg text-center bg-gray-100">
-                <p className="text-gray-600 font-semibold">Initializing chat assistant...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="border border-gray-300 rounded-xl p-4 space-y-4 shadow-inner bg-gray-50">
@@ -140,10 +99,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="e.g., What was my total spending?"
                     className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100"
-                    disabled={isLoading || !chat}
+                    disabled={isLoading}
                     aria-label="Chat input"
                 />
-                <button type="submit" className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed" disabled={isLoading || !chat || !userInput.trim()}>
+                <button type="submit" className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed" disabled={isLoading || !userInput.trim()}>
                     <i className="fas fa-paper-plane"></i>
                     <span className="sr-only">Send Message</span>
                 </button>
