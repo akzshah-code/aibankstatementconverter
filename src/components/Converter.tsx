@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { PDFDocument } from 'pdf-lib';
+import pdfParse from 'pdf-parse';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
 import { useUser } from '../contexts/UserContext';
@@ -175,13 +175,15 @@ const Converter: React.FC = () => {
 
     // Determine page count and check quota
     let docPageCount = 1;
+    let extractedText: string | null = null;
     if (file.type === 'application/pdf') {
         try {
             const fileBuffer = await file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
-            docPageCount = pdfDoc.getPageCount();
+            const data = await pdfParse(fileBuffer);
+            docPageCount = data.numpages;
+            extractedText = data.text;
         } catch (err: unknown) {
-             setError('Could not read the PDF to determine page count. It may be corrupted or encrypted.');
+             setError('Could not parse the PDF. It may be corrupted or password-protected. Please use the "Unlock PDF" feature first if it is password-protected.');
              setIsLoading(false);
              return;
         }
@@ -209,12 +211,10 @@ const Converter: React.FC = () => {
         throw new Error("API_KEY environment variable not set. Please configure it in your deployment settings.");
       }
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const base64Data = await fileToBase64(file);
-
-      const filePart = { inlineData: { mimeType: file.type, data: base64Data } };
-      const textPart = { text: `
-        Analyze the provided bank statement image or PDF and extract all transactions into a structured JSON array.
-
+      
+      let finalContents: { parts: ({ text: string; } | { inlineData: { mimeType: string; data: string; }; })[]; };
+            
+      const commonPromptRules = `
         For each transaction, you MUST extract the following fields according to the rules below:
         - 'date': The primary date of the transaction.
         - 'narration': The transaction description.
@@ -230,7 +230,24 @@ const Converter: React.FC = () => {
         3.  **Value Date Logic:** The 'date' field gets the main transaction date. If you find a separate date embedded within the narration (e.g., "...on 11-02-25..."), extract it into the 'valueDate' field. If no separate date is found, 'valueDate' MUST be identical to 'date'.
         4.  **Numeric Amounts:** 'withdrawalAmt', 'depositAmt', and 'closingBalance' must be strings containing only numbers and a decimal point, without any currency symbols or commas.
         5.  **Handling Missing Values:** If a field's value is not present for a transaction (e.g., no 'withdrawalAmt' for a deposit, or no 'refNo'), you MUST return an empty string "" for that specific field in the JSON output.
-      `};
+      `;
+      
+      if (file.type === 'application/pdf' && extractedText) {
+          const textPart = { text: `
+            Analyze the following text extracted from a bank statement and extract all transactions into a structured JSON array.
+            Here is the text:
+            ---
+            ${extractedText}
+            ---
+            ${commonPromptRules}
+          `};
+          finalContents = { parts: [textPart] };
+      } else {
+          const base64Data = await fileToBase64(file);
+          const filePart = { inlineData: { mimeType: file.type, data: base64Data } };
+          const textPart = { text: `Analyze the provided bank statement image and extract all transactions into a structured JSON array.\n${commonPromptRules}`};
+          finalContents = { parts: [filePart, textPart] };
+      }
       
       const schema = {
         type: Type.ARRAY,
@@ -251,7 +268,7 @@ const Converter: React.FC = () => {
 
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: { parts: [filePart, textPart] },
+        contents: finalContents,
         config: { 
           responseMimeType: "application/json", 
           responseSchema: schema,

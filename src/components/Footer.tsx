@@ -5,16 +5,17 @@ interface FooterProps {
   onNavigateToTerms: () => void;
   onNavigateToAbout: () => void;
   onNavigateToFaq: () => void;
+  onNavigateToApiDocs: () => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq }) => {
+const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq, onNavigateToApiDocs }) => {
   const handleLinkClick = (handler: () => void) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handler();
   };
 
   const footerLinks = [
-    { text: 'API Docs', handler: () => alert('Coming soon!') },
+    { text: 'API Docs', handler: onNavigateToApiDocs },
     { text: 'About', handler: onNavigateToAbout },
     { text: 'Terms', handler: onNavigateToTerms },
     { text: 'Privacy', handler: onNavigateToPrivacy },

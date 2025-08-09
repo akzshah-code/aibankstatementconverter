@@ -12,6 +12,7 @@ const UnlockPdf: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [unlockedMessage, setUnlockedMessage] = useState<string>('');
+  const [unsupportedEncryptionError, setUnsupportedEncryptionError] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, recordConversion, checkAnonymousUsage, recordAnonymousUsage } = useUser();
 
@@ -26,6 +27,7 @@ const UnlockPdf: React.FC = () => {
     setStatus('idle');
     setPassword('');
     setShowPassword(false);
+    setUnsupportedEncryptionError(false);
   }, []);
 
   const handleFile = useCallback(async (selectedFile: File | null) => {
@@ -92,6 +94,7 @@ const UnlockPdf: React.FC = () => {
     }
     setStatus('loading');
     setError(null);
+    setUnsupportedEncryptionError(false);
     
     try {
       const fileBuffer = await file.arrayBuffer();
@@ -113,6 +116,7 @@ const UnlockPdf: React.FC = () => {
       setStatus('password'); // Go back to password entry screen
       if (err instanceof Error && (err.name === 'PasswordIsIncorrectError' || (err.message && err.message.toLowerCase().includes('encrypted')))) {
         setError('Incorrect password. If you are certain the password is correct, the file may use an encryption method that is not supported.');
+        setUnsupportedEncryptionError(true);
       } else {
         console.error("PDF Unlock failed:", err);
         setError('An unexpected error occurred. The file may be corrupted or use unsupported encryption.');
@@ -208,8 +212,35 @@ const UnlockPdf: React.FC = () => {
             return (
               <div className="max-w-md mx-auto bg-white rounded-xl p-8 border border-gray-200 shadow-lg animate-fade-in">
                   <h3 className="text-2xl font-bold text-gray-800 text-left">Password Required</h3>
-                   {error && <p id="password-error" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
-                  <p className="text-sm text-gray-600 mt-2 mb-4">This file is encrypted. Please enter the password to unlock it.</p>
+                   {error && !unsupportedEncryptionError && <p id="password-error" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
+                   {error && unsupportedEncryptionError && <p id="password-error-special" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
+
+                  {unsupportedEncryptionError && (
+                      <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                          <div className="flex">
+                              <div className="flex-shrink-0">
+                                  <i className="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                              </div>
+                              <div className="ml-3">
+                                  <h4 className="text-sm font-bold text-blue-800">A Secure Workaround</h4>
+                                  <div className="text-sm text-blue-700 mt-2 space-y-2">
+                                      <p>
+                                          Some banks use advanced encryption our tool can't handle in the browser. For your security, we never upload locked files. Here’s a simple, secure fix:
+                                      </p>
+                                      <ol className="list-decimal list-inside space-y-1 pl-2">
+                                          <li>Open the PDF in your web browser (like Chrome) or Adobe Reader.</li>
+                                          <li>Press <strong>Ctrl+P</strong> (Windows) or <strong>Cmd+P</strong> (Mac) to open the print dialog.</li>
+                                          <li>Change the 'Destination' or 'Printer' to <strong>"Save as PDF"</strong>.</li>
+                                          <li>Click "Save" to create a new, unlocked version of the file.</li>
+                                          <li>Upload that newly saved file to our converter.</li>
+                                      </ol>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  )}
+                  
+                  <p className="text-sm text-gray-600 mt-4 mb-4">This file is encrypted. Please enter the password to unlock it.</p>
                   
                   <form onSubmit={handleUnlock} className="space-y-4">
                       <div>
@@ -223,6 +254,7 @@ const UnlockPdf: React.FC = () => {
                                   onChange={(e) => {
                                       setPassword(e.target.value);
                                       if (error) setError(null);
+                                      if (unsupportedEncryptionError) setUnsupportedEncryptionError(false);
                                   }}
                                   placeholder="Password"
                                   required

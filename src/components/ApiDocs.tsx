@@ -10,10 +10,6 @@ const faqData = [
         answer: "Yes! Our advanced AI combines OCR (Optical Character Recognition) with bank statement pattern recognition to accurately extract data even from low-quality scans or mobile photographs of statements."
     },
     {
-        question: "What file types are accepted, and what if my PDF is password-protected?",
-        answer: "We accept PDF, JPG, and PNG files for conversion. If your PDF is password-protected, please use our 'Unlock PDF' tool first. If the tool shows an error even with the correct password, it's likely due to advanced encryption. You can securely unlock it yourself by opening the file in your browser or Adobe Reader, pressing Ctrl+P (or Cmd+P), and choosing 'Save as PDF' as the printer. Then, upload the new, unlocked file to our converter."
-    },
-    {
         question: "Do you offer an API for integration?",
         answer: "Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our API documentation is comprehensive and we provide dedicated support for integration."
     },
