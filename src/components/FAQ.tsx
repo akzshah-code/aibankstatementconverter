@@ -84,4 +84,5 @@ const FAQ: React.FC = () => {
     );
 };
 
+
 export default FAQ;

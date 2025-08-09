@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
-import pdfParse from 'pdf-parse';
+import { PDFDocument } from 'pdf-lib';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
 import { useUser } from '../contexts/UserContext';
@@ -175,15 +175,13 @@ const Converter: React.FC = () => {
 
     // Determine page count and check quota
     let docPageCount = 1;
-    let extractedText: string | null = null;
     if (file.type === 'application/pdf') {
         try {
             const fileBuffer = await file.arrayBuffer();
-            const data = await pdfParse(fileBuffer);
-            docPageCount = data.numpages;
-            extractedText = data.text;
+            const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+            docPageCount = pdfDoc.getPageCount();
         } catch (err: unknown) {
-             setError('Could not parse the PDF. It may be corrupted or password-protected. Please use the "Unlock PDF" feature first if it is password-protected.');
+             setError('Could not parse the PDF. It may be corrupted. If it is password-protected, please use the "Unlock PDF" tool first.');
              setIsLoading(false);
              return;
         }
@@ -232,22 +230,16 @@ const Converter: React.FC = () => {
         5.  **Handling Missing Values:** If a field's value is not present for a transaction (e.g., no 'withdrawalAmt' for a deposit, or no 'refNo'), you MUST return an empty string "" for that specific field in the JSON output.
       `;
       
-      if (file.type === 'application/pdf' && extractedText) {
-          const textPart = { text: `
-            Analyze the following text extracted from a bank statement and extract all transactions into a structured JSON array.
-            Here is the text:
-            ---
-            ${extractedText}
-            ---
-            ${commonPromptRules}
-          `};
-          finalContents = { parts: [textPart] };
-      } else {
-          const base64Data = await fileToBase64(file);
-          const filePart = { inlineData: { mimeType: file.type, data: base64Data } };
-          const textPart = { text: `Analyze the provided bank statement image and extract all transactions into a structured JSON array.\n${commonPromptRules}`};
-          finalContents = { parts: [filePart, textPart] };
-      }
+      // Always send the full file to Gemini Vision
+      const base64Data = await fileToBase64(file);
+      const filePart = { inlineData: { mimeType: file.type, data: base64Data } };
+      
+      const promptText = file.type === 'application/pdf'
+        ? `Analyze the provided bank statement PDF and extract all transactions into a structured JSON array.\n${commonPromptRules}`
+        : `Analyze the provided bank statement image and extract all transactions into a structured JSON array.\n${commonPromptRules}`;
+
+      const textPart = { text: promptText };
+      finalContents = { parts: [filePart, textPart] };
       
       const schema = {
         type: Type.ARRAY,
