@@ -11,7 +11,7 @@ const faqData = [
     },
     {
         question: "What file types are accepted, and what if my PDF is password-protected?",
-        answer: "We accept PDF, JPG, and PNG files for conversion. If your PDF is password-protected, please use our 'Unlock PDF' tool first. If the tool shows an error even with the correct password, it's likely due to advanced encryption. You can securely unlock it yourself by opening the file in your browser or Adobe Reader, pressing Ctrl+P (or Cmd+P), and choosing 'Save as PDF' as the printer. Then, upload the new, unlocked file to our converter."
+        answer: "We accept PDF, JPG, and PNG files for conversion. If you upload a password-protected PDF, our tool will prompt you to enter the password to unlock it for processing. If the password fails, it may be due to advanced encryption. In that case, you can securely unlock it yourself by opening the file in your browser or Adobe Reader, pressing Ctrl+P (or Cmd+P), choosing 'Save as PDF', and then uploading the new, unlocked file to our converter."
     },
     {
         question: "Do you offer an API for integration?",
@@ -83,6 +83,5 @@ const FAQ: React.FC = () => {
         </div>
     );
 };
-
 
 export default FAQ;

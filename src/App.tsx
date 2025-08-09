@@ -13,7 +13,6 @@ const Pricing = lazy(() => import('./components/Pricing'));
 const DemoView = lazy(() => import('./components/DemoView'));
 const Login = lazy(() => import('./components/Login'));
 const Register = lazy(() => import('./components/Register'));
-const UnlockPdf = lazy(() => import('./components/UnlockPdf'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
@@ -21,7 +20,7 @@ const About = lazy(() => import('./components/About'));
 const FAQ = lazy(() => import('./components/FAQ'));
 const ApiDocs = lazy(() => import('./components/ApiDocs'));
 
-type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'unlock' | 'privacy' | 'terms' | 'dashboard' | 'about' | 'faq' | 'api-docs';
+type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'privacy' | 'terms' | 'dashboard' | 'about' | 'faq' | 'api-docs';
 
 const LoadingSpinner: React.FC = () => (
     <div className="flex justify-center items-center py-20 min-h-[calc(100vh-160px)]">
@@ -85,8 +84,6 @@ const App: React.FC = () => {
         return <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'register':
         return <Register onNavigateToLogin={() => changeView('login')} />;
-      case 'unlock':
-        return <UnlockPdf />;
       case 'privacy':
         return <PrivacyPolicy />;
       case 'terms':
@@ -126,7 +123,6 @@ const App: React.FC = () => {
         onShowPricingPage={() => changeView('pricing')}
         onNavigateToLogin={() => changeView('login')}
         onNavigateToRegister={() => changeView('register')}
-        onNavigateToUnlock={() => changeView('unlock')}
         onNavigateToDashboard={() => changeView('dashboard')}
         onNavigateToConvert={() => navigateToMainPage(heroRef)}
         onNavigateHome={() => navigateToMainPage()}

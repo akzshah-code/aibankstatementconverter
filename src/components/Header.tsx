@@ -7,14 +7,13 @@ interface HeaderProps {
   onShowPricingPage: () => void;
   onNavigateToLogin: () => void;
   onNavigateToRegister: () => void;
-  onNavigateToUnlock: () => void;
   onNavigateToConvert: () => void;
   onNavigateHome: () => void;
   onNavigateToDashboard: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
-  user, onLogout, onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToUnlock, onNavigateToConvert, onNavigateHome, onNavigateToDashboard
+  user, onLogout, onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToConvert, onNavigateHome, onNavigateToDashboard
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -36,9 +35,6 @@ const Header: React.FC<HeaderProps> = ({
         <div className="hidden md:flex items-center space-x-8">
           <a href="#convert" onClick={handleLinkClick(onNavigateToConvert)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
             Convert
-          </a>
-          <a href="#unlock" onClick={handleLinkClick(onNavigateToUnlock)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
-            Unlock PDF
           </a>
           <a href="#pricing" onClick={handleLinkClick(onShowPricingPage)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
             Pricing
@@ -88,7 +84,6 @@ const Header: React.FC<HeaderProps> = ({
          <div className="bg-white border-t border-gray-200">
             <div className="container mx-auto px-6 py-4 flex flex-col items-start space-y-4">
               <a href="#convert" onClick={handleLinkClick(onNavigateToConvert)} className="text-gray-600 hover:text-primary font-medium">Convert</a>
-              <a href="#unlock" onClick={handleLinkClick(onNavigateToUnlock)} className="text-gray-600 hover:text-primary font-medium">Unlock PDF</a>
               <a href="#pricing" onClick={handleLinkClick(onShowPricingPage)} className="text-gray-600 hover:text-primary font-medium">Pricing</a>
               {user ? (
                  <>
