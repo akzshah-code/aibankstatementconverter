@@ -93,7 +93,7 @@ const App: React.FC = () => {
       case 'faq':
         return <FAQ />;
       case 'api-docs':
-        return <ApiDocs />;
+        return <ApiDocs onNavigateHome={() => changeView('main')} />;
       case 'dashboard':
         return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'main':
@@ -117,22 +117,26 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-white text-gray-800 font-sans">
-      <Header
-        user={user}
-        onLogout={handleLogout}
-        onShowPricingPage={() => changeView('pricing')}
-        onNavigateToLogin={() => changeView('login')}
-        onNavigateToRegister={() => changeView('register')}
-        onNavigateToDashboard={() => changeView('dashboard')}
-        onNavigateToConvert={() => navigateToMainPage(heroRef)}
-        onNavigateHome={() => navigateToMainPage()}
-      />
-      <main className="pt-20"> {/* Adjusted padding for fixed header */}
+      {view !== 'api-docs' && (
+        <Header
+          user={user}
+          onLogout={handleLogout}
+          onShowPricingPage={() => changeView('pricing')}
+          onNavigateToLogin={() => changeView('login')}
+          onNavigateToRegister={() => changeView('register')}
+          onNavigateToDashboard={() => changeView('dashboard')}
+          onNavigateToConvert={() => navigateToMainPage(heroRef)}
+          onNavigateHome={() => navigateToMainPage()}
+        />
+      )}
+      <main className={view !== 'api-docs' ? "pt-20" : ""}>
         <Suspense fallback={<LoadingSpinner />}>
           {renderContent()}
         </Suspense>
       </main>
-      <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} onNavigateToApiDocs={() => changeView('api-docs')} />
+      {view !== 'api-docs' && (
+        <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} onNavigateToApiDocs={() => changeView('api-docs')} />
+      )}
     </div>
   );
 };
