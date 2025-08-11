@@ -1,8 +1,12 @@
 
+
 import React, { useState, useCallback, useRef } from 'react';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
 import { useUser } from '../contexts/UserContext';
+import { GoogleGenAI, Type } from "@google/genai";
+import { PDFDocument } from 'pdf-lib';
+
 
 // --- Sub-components ---
 const StatCard: React.FC<{ value: string | number; label: string }> = ({ value, label }) => (
@@ -79,6 +83,28 @@ const downloadData = (data: string, filename: string, type: string) => {
   URL.revokeObjectURL(url);
 };
 
+const fileToArrayBuffer = (file: File): Promise<ArrayBuffer> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+    });
+};
+
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const result = reader.result as string;
+            const base64Data = result.split(',')[1];
+            resolve(base64Data);
+        };
+        reader.onerror = error => reject(error);
+    });
+};
+
 
 const Converter: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -97,7 +123,7 @@ const Converter: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showSecureWorkaround, setShowSecureWorkaround] = useState<boolean>(false);
 
-  const { user, recordConversion } = useUser();
+  const { user, recordConversion, checkAnonymousUsage, recordAnonymousUsage: recordAnon } = useUser();
 
   const handleFileSelection = useCallback((selectedFile: File | null) => {
     if (selectedFile) {
@@ -145,48 +171,84 @@ const Converter: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  const handleConversionAttempt = async (fileToProcess: File, passwordToTry?: string) => {
+  const handleConversion = async (fileToProcess: File) => {
     const startTime = Date.now();
+    setIsLoading(true);
+    setError(null);
     
-    const formData = new FormData();
-    formData.append('file', fileToProcess);
-    if (passwordToTry) {
-        formData.append('password', passwordToTry);
-    }
-  
     try {
-        const response = await fetch('http://localhost:3001/api/convert', {
-            method: 'POST',
-            headers: {
-                // Send user email for backend authentication and quota checks.
-                // An empty string is sent for anonymous users.
-                'X-User-Email': user?.email || '',
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        const base64Data = await fileToBase64(fileToProcess);
+        
+        const filePart = {
+            inlineData: {
+                data: base64Data,
+                mimeType: fileToProcess.type,
             },
-            body: formData,
+        };
+
+        const schema = {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    date: { type: Type.STRING, description: 'Transaction date (YYYY-MM-DD)' },
+                    narration: { type: Type.STRING, description: 'Clean transaction description. Any data extracted into other fields (like `refNo` or `valueDate`) should be removed from this field.' },
+                    refNo: { type: Type.STRING, description: 'Reference or cheque number' },
+                    valueDate: { type: Type.STRING, description: 'Value date of the transaction (YYYY-MM-DD)' },
+                    withdrawalAmt: { type: Type.NUMBER, description: 'Withdrawal amount' },
+                    depositAmt: { type: Type.NUMBER, description: 'Deposit amount' },
+                    closingBalance: { type: Type.NUMBER, description: 'Closing balance after the transaction' },
+                },
+                required: ['date', 'narration', 'valueDate', 'closingBalance']
+            }
+        };
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: {
+                parts: [
+                    filePart,
+                    { text: 'Analyze this bank statement and extract all transactions into a structured JSON format according to the provided schema. Ensure all monetary values are represented as numbers. If a value is not present for a field (e.g., withdrawal amount in a credit transaction), it should be null or omitted. After extracting data into fields like `refNo` and `valueDate`, remove that information from the `narration` field to keep it clean and avoid duplication.' }
+                ]
+            },
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: schema
+            }
         });
 
-        const result = await response.json();
+        const jsonData = JSON.parse(response.text);
         
-        if (!response.ok) {
-            // Re-throw the error with details from the backend
-            throw result;
+        let numPages = 1; // Default for images
+        if (fileToProcess.type === 'application/pdf') {
+            try {
+                const pdfBytes = await fileToArrayBuffer(fileToProcess);
+                const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+                numPages = pdfDoc.getPageCount();
+            } catch (e) { console.warn("Could not count PDF pages", e); }
         }
-        
-        const endTime = Date.now();
 
-        // Update client-side state after successful backend processing
         if (user) {
-            recordConversion(file?.name || 'unknown', result.pageCount, 'Completed');
+            recordConversion(fileToProcess.name, numPages, 'Completed');
+        } else {
+            recordAnon();
         }
         
-        setPageCount(result.pageCount);
-        setExtractedData(result.data);
-        setProcessingTime((endTime - startTime) / 1000);
+        setPageCount(numPages);
+        setExtractedData(jsonData);
+        setProcessingTime((Date.now() - startTime) / 1000);
         setShowPasswordPrompt(false);
-        setShowSecureWorkaround(false);
 
     } catch (err) {
-        throw err; // Re-throw to be handled by the calling function.
+        console.error("Conversion failed:", err);
+        const errorMessage = (err as Error).message || 'An unknown error occurred during conversion.';
+        setError(`Conversion Failed: ${errorMessage}`);
+        if (user) {
+            recordConversion(file?.name || 'unknown', 0, 'Failed');
+        }
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -199,22 +261,21 @@ const Converter: React.FC = () => {
     setShowPasswordPrompt(false);
     setShowSecureWorkaround(false);
     
-    try {
-        await handleConversionAttempt(file);
-    } catch (err: any) {
-        if (err?.detail === 'unlock_failed') {
-            setError('This PDF is password-protected. Please enter the password to proceed.');
-            setShowPasswordPrompt(true);
-        } else if (err?.detail === 'quota_exceeded') {
-            setError(err.error || 'You have exceeded your page quota for this period.');
-        } else {
-            console.error("Conversion failed:", err);
-            const errorMessage = err.error || 'An unknown error occurred during conversion.';
-            setError(`Conversion Failed: ${errorMessage}`);
+    if (file.type === 'application/pdf') {
+        try {
+            const fileBuffer = await fileToArrayBuffer(file);
+            const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+            if (pdfDoc.isEncrypted) {
+                setError('This PDF is password-protected. Please enter the password to proceed.');
+                setShowPasswordPrompt(true);
+                setIsLoading(false);
+                return;
+            }
+        } catch (err) {
+            console.warn("Could not analyze PDF with pdf-lib, passing to Gemini anyway.", err);
         }
-    } finally {
-        setIsLoading(false);
     }
+    await handleConversion(file);
   };
 
   const handleUnlockAndConvert = async (e: React.FormEvent) => {
@@ -225,19 +286,28 @@ const Converter: React.FC = () => {
     setError(null);
 
     try {
-        await handleConversionAttempt(file, password);
+        const fileBuffer = await fileToArrayBuffer(file);
+        const pdfDoc = await PDFDocument.load(fileBuffer, { password: password } as any);
+        
+        const unlockedPdfBytes = await pdfDoc.save();
+        const unlockedFile = new File([unlockedPdfBytes], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
+        
+        setShowPasswordPrompt(false);
+        setPassword('');
+        setFile(unlockedFile);
+        await handleConversion(unlockedFile);
+
     } catch (err: any) {
-        if (err?.detail === 'unlock_failed') {
-            setError('Incorrect password. Please try again or use the secure workaround.');
-            setShowSecureWorkaround(true); // Ensure it stays visible.
-        } else {
-            console.error("Conversion failed on retry:", err);
-            const errorMessage = err.error || 'An unknown error occurred.';
-            setError(`Conversion Failed: ${errorMessage}`);
-            setShowPasswordPrompt(false); // Hide prompt on other errors
-        }
-    } finally {
         setIsLoading(false);
+        if (err.name === 'PasswordIsIncorrectError') {
+            setError('Incorrect password. Please try again or use the secure workaround.');
+            setShowSecureWorkaround(true);
+        } else {
+            console.error("Unlock failed:", err);
+            const errorMessage = err.message || 'An unknown error occurred.';
+            setError(`Unlock Failed: ${errorMessage}`);
+            setShowPasswordPrompt(false);
+        }
     }
   };
   

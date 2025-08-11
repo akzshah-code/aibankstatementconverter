@@ -27,7 +27,5 @@ export default defineConfig(() => {
         }
       }
     },
-    // The API key is no longer exposed to the client.
-    // It will be used exclusively by the backend server.
   }
 })
