@@ -90,8 +90,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       name,
       email,
       subscription: {
-        planName: 'Business',
-        pagesQuota: PLANS['Business'].pagesPerMonth,
+        planName: 'Free',
+        pagesQuota: PLANS['Free'].pagesPerMonth,
         pagesUsed: 0,
         startDate: now.toISOString(),
         endDate: new Date(new Date(now).setMonth(now.getMonth() + 1)).toISOString(),

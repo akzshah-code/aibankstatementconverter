@@ -97,7 +97,7 @@ const Converter: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showSecureWorkaround, setShowSecureWorkaround] = useState<boolean>(false);
 
-  const { user, recordConversion, checkAnonymousUsage, recordAnonymousUsage } = useUser();
+  const { user, recordConversion } = useUser();
 
   const handleFileSelection = useCallback((selectedFile: File | null) => {
     if (selectedFile) {
@@ -148,15 +148,6 @@ const Converter: React.FC = () => {
   const handleConversionAttempt = async (fileToProcess: File, passwordToTry?: string) => {
     const startTime = Date.now();
     
-    // Quota check simulation on frontend before sending to backend
-    // In a real scenario with a secure backend, quota checks would happen there.
-    // For this app, we'll assume a PDF costs 1 page credit to check initially.
-    // The backend will return the true page count.
-    const initialPageEstimate = 1; 
-    if (!checkQuota(initialPageEstimate)) {
-      return; // checkQuota sets the error and loading state.
-    }
-    
     const formData = new FormData();
     formData.append('file', fileToProcess);
     if (passwordToTry) {
@@ -166,23 +157,27 @@ const Converter: React.FC = () => {
     try {
         const response = await fetch('http://localhost:3001/api/convert', {
             method: 'POST',
+            headers: {
+                // Send user email for backend authentication and quota checks.
+                // An empty string is sent for anonymous users.
+                'X-User-Email': user?.email || '',
+            },
             body: formData,
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            if (response.status === 400 && errorData.detail === 'unlock_failed') {
-                 throw { detail: 'unlock_failed' };
-            }
-            throw new Error(errorData.error || 'A server error occurred.');
-        }
-
         const result = await response.json();
+        
+        if (!response.ok) {
+            // Re-throw the error with details from the backend
+            throw result;
+        }
+        
         const endTime = Date.now();
 
-        // Now that we have the real page count from the backend, record usage.
-        if (user) recordConversion(file?.name || 'unknown', result.pageCount, 'Completed');
-        else recordAnonymousUsage(); // Assumes 1 page for anon users
+        // Update client-side state after successful backend processing
+        if (user) {
+            recordConversion(file?.name || 'unknown', result.pageCount, 'Completed');
+        }
         
         setPageCount(result.pageCount);
         setExtractedData(result.data);
@@ -210,9 +205,11 @@ const Converter: React.FC = () => {
         if (err?.detail === 'unlock_failed') {
             setError('This PDF is password-protected. Please enter the password to proceed.');
             setShowPasswordPrompt(true);
+        } else if (err?.detail === 'quota_exceeded') {
+            setError(err.error || 'You have exceeded your page quota for this period.');
         } else {
             console.error("Conversion failed:", err);
-            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred during conversion.';
+            const errorMessage = err.error || 'An unknown error occurred during conversion.';
             setError(`Conversion Failed: ${errorMessage}`);
         }
     } finally {
@@ -235,31 +232,13 @@ const Converter: React.FC = () => {
             setShowSecureWorkaround(true); // Ensure it stays visible.
         } else {
             console.error("Conversion failed on retry:", err);
-            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+            const errorMessage = err.error || 'An unknown error occurred.';
             setError(`Conversion Failed: ${errorMessage}`);
             setShowPasswordPrompt(false); // Hide prompt on other errors
         }
     } finally {
         setIsLoading(false);
     }
-  };
-
-  const checkQuota = (pages: number): boolean => {
-    if (user) {
-        const remainingPages = user.subscription.pagesQuota - user.subscription.pagesUsed;
-        if (pages > remainingPages) {
-            setError(`You do not have enough page credits. This document requires at least ${pages} page(s), but you only have ${remainingPages} remaining.`);
-            setIsLoading(false);
-            return false;
-        }
-    } else {
-        if (!checkAnonymousUsage()) {
-            setError('You have reached your daily limit for anonymous conversions (1 page/day). Please register for a free account to convert more.');
-            setIsLoading(false);
-            return false;
-        }
-    }
-    return true;
   };
   
   const handleDownload = (format: 'csv' | 'xls' | 'json') => {
