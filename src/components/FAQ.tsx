@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface FaqProps {
-    onNavigateToApiDocs: () => void;
+    onNavigateToFaq: () => void;
 }
 
 interface FaqItemData {
@@ -34,7 +34,7 @@ const FaqItem: React.FC<{ item: FaqItemData, isOpen: boolean, onClick: () => voi
 };
 
 
-const FAQ: React.FC<FaqProps> = ({ onNavigateToApiDocs }) => {
+const FAQ: React.FC<FaqProps> = ({ onNavigateToFaq }) => {
     const [openIndex, setOpenIndex] = useState<number | null>(0); // Open first item by default
 
     const faqItems: FaqItemData[] = [
