@@ -73,7 +73,7 @@ const UsageTiers: React.FC<UsageTiersProps> = ({ onNavigateToPricing, onNavigate
             </div>
             <div className="mt-auto pt-4 border-t border-gray-100 flex justify-end items-end">
               <a href="#pricing" onClick={handleSubscribeClick} className="text-primary hover:underline font-semibold">
-                Register
+                Subscribe
               </a>
             </div>
           </div>

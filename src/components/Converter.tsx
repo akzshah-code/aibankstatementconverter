@@ -281,33 +281,53 @@ const Converter: React.FC = () => {
   const handleUnlockAndConvert = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !password) { setError("Please enter a password."); return; }
-    
+
     setIsLoading(true);
     setError(null);
+    setShowSecureWorkaround(false);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('password', password);
 
     try {
-        const fileBuffer = await fileToArrayBuffer(file);
-        const pdfDoc = await PDFDocument.load(fileBuffer, { password: password } as any);
+      // This endpoint is hypothetical. It would need to be implemented on a backend server
+      // that can run a tool like 'qpdf' for robust decryption.
+      const response = await fetch('/api/unlock-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        // Try to parse error message from backend
+        const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
         
-        const unlockedPdfBytes = await pdfDoc.save();
-        const unlockedFile = new File([unlockedPdfBytes], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
-        
-        setShowPasswordPrompt(false);
-        setPassword('');
-        setFile(unlockedFile);
-        await handleConversion(unlockedFile);
+        if (response.status === 400) { // e.g., Bad Request for incorrect password
+           setError(errorData.message || 'Incorrect password. If you are certain the password is correct, the file may use an encryption method not supported by our backend.');
+           setShowSecureWorkaround(true);
+        } else {
+           throw new Error(errorData.message || `Server error: ${response.status}`);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      const unlockedPdfBlob = await response.blob();
+      const unlockedFile = new File([unlockedPdfBlob], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
+      
+      setShowPasswordPrompt(false);
+      setPassword('');
+      setFile(unlockedFile);
+      // Now that the file is "unlocked", proceed with Gemini conversion
+      await handleConversion(unlockedFile);
 
     } catch (err: any) {
-        setIsLoading(false);
-        if (err.name === 'PasswordIsIncorrectError') {
-            setError('Incorrect password. Please try again or use the secure workaround.');
-            setShowSecureWorkaround(true);
-        } else {
-            console.error("Unlock failed:", err);
-            const errorMessage = err.message || 'An unknown error occurred.';
-            setError(`Unlock Failed: ${errorMessage}`);
-            setShowPasswordPrompt(false);
-        }
+      console.error("Unlock process failed:", err);
+      setIsLoading(false);
+      // This will catch network errors or if the backend isn't running
+      const errorMessage = err.message || 'An unknown error occurred during the unlock process.';
+      setError(`Unlock Failed: ${errorMessage}. Please ensure the backend server is running and accessible.`);
+      setShowPasswordPrompt(true); // Keep the prompt open for another attempt
     }
   };
   
@@ -403,6 +423,7 @@ const Converter: React.FC = () => {
     return (
       <div className="w-full max-w-lg mx-auto bg-white rounded-xl p-6 border border-gray-200 shadow-lg animate-fade-in">
           <h3 className="text-xl font-bold text-gray-800 text-left">Password Required</h3>
+          <p className="mt-2 text-sm text-gray-600 text-left">This PDF is encrypted. Please enter the password to unlock it for conversion.</p>
           {error && <p id="password-error" className="mt-2 text-sm font-medium text-red-600 text-left">{error}</p>}
           
           {showSecureWorkaround && (

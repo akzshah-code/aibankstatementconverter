@@ -95,13 +95,33 @@ const UnlockPdf: React.FC = () => {
     setStatus('loading');
     setError(null);
     setUnsupportedEncryptionError(false);
-    
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('password', password);
+
     try {
-      const fileBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(fileBuffer, { password: password } as any);
+      // This endpoint is hypothetical. It would need to be implemented on a backend server
+      // that can run a tool like 'qpdf' for robust decryption.
+      const response = await fetch('/api/unlock-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
+        if (response.status === 400) {
+          setError(errorData.message || 'Incorrect password. If you are certain the password is correct, the file may use an encryption method not supported by our backend.');
+          setUnsupportedEncryptionError(true);
+        } else {
+          throw new Error(errorData.message || `Server error: ${response.status}`);
+        }
+        setStatus('password');
+        return;
+      }
       
-      const unlockedPdfBytes = await pdfDoc.save();
-      const unlockedFile = new File([unlockedPdfBytes], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
+      const unlockedPdfBlob = await response.blob();
+      const unlockedFile = new File([unlockedPdfBlob], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
       
       const pageCost = 1;
       if (user) recordConversion(file.name, pageCost, 'Completed');
@@ -113,14 +133,10 @@ const UnlockPdf: React.FC = () => {
       setPassword('');
 
     } catch (err: unknown) {
-      setStatus('password'); // Go back to password entry screen
-      if (err instanceof Error && (err.name === 'PasswordIsIncorrectError' || (err.message && err.message.toLowerCase().includes('encrypted')))) {
-        setError('Incorrect password. If you are certain the password is correct, the file may use an encryption method that is not supported.');
-        setUnsupportedEncryptionError(true);
-      } else {
-        console.error("PDF Unlock failed:", err);
-        setError('An unexpected error occurred. The file may be corrupted or use unsupported encryption.');
-      }
+      setStatus('password'); // Go back to password entry screen on failure
+      console.error("PDF Unlock process failed:", err);
+      setError('An unexpected error occurred. This could be a network issue or the server may be down.');
+      setUnsupportedEncryptionError(false); // Generic error for network issues etc.
     }
   };
   
