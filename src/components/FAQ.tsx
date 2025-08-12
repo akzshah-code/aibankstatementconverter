@@ -52,11 +52,7 @@ const FAQ: React.FC<FaqProps> = () => {
         },
         {
             question: "Do you offer an API for integration?",
-            answer: (
-                <>
-                    Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our API documentation is comprehensive and we provide dedicated support for integration.
-                </>
-            )
+            answer: "Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Contact us for more details."
         },
         {
             question: "Which banks do you support?",
