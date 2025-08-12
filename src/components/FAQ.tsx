@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 
-const faqData = [
+interface FaqProps {
+    onNavigateToApiDocs: () => void;
+}
+
+interface FaqItemData {
+    question: string;
+    answer: React.ReactNode;
+}
+
+const faqData = ({ onNavigateToApiDocs }: FaqProps): FaqItemData[] => [
     {
         question: "Is my banking data secure?",
         answer: "Absolutely! We use bank-grade 256-bit encryption for all data transfers and storage. Files are automatically deleted from our servers immediately after processing. We never store your financial data long-term."
@@ -15,7 +24,15 @@ const faqData = [
     },
     {
         question: "Do you offer an API for integration?",
-        answer: "Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our API documentation is comprehensive and we provide dedicated support for integration."
+        answer: (
+            <>
+                Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our{' '}
+                <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToApiDocs(); }} className="text-primary hover:underline font-semibold">
+                    API documentation is comprehensive
+                </a>
+                {' '}and we provide dedicated support for integration.
+            </>
+        )
     },
     {
         question: "Which banks do you support?",
@@ -27,7 +44,7 @@ const faqData = [
     }
 ];
 
-const FaqItem: React.FC<{ item: { question: string, answer: string }, isOpen: boolean, onClick: () => void }> = ({ item, isOpen, onClick }) => {
+const FaqItem: React.FC<{ item: FaqItemData, isOpen: boolean, onClick: () => void }> = ({ item, isOpen, onClick }) => {
     return (
         <div className="border-b border-gray-200 py-4 last:border-b-0">
             <button
@@ -42,9 +59,9 @@ const FaqItem: React.FC<{ item: { question: string, answer: string }, isOpen: bo
                 className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
             >
                 <div className="overflow-hidden">
-                    <p className="text-gray-600 pt-2">
+                    <div className="text-gray-600 pt-2">
                         {item.answer}
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,8 +69,9 @@ const FaqItem: React.FC<{ item: { question: string, answer: string }, isOpen: bo
 };
 
 
-const FAQ: React.FC = () => {
+const FAQ: React.FC<FaqProps> = (props) => {
     const [openIndex, setOpenIndex] = useState<number | null>(0); // Open first item by default
+    const data = faqData(props);
 
     const handleClick = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -70,7 +88,7 @@ const FAQ: React.FC = () => {
                 </header>
 
                 <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200">
-                    {faqData.map((item, index) => (
+                    {data.map((item, index) => (
                         <FaqItem
                             key={index}
                             item={item}

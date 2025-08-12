@@ -91,7 +91,7 @@ const App: React.FC = () => {
       case 'about':
         return <About />;
       case 'faq':
-        return <FAQ />;
+        return <FAQ onNavigateToApiDocs={() => changeView('api-docs')} />;
       case 'api-docs':
         return <ApiDocs onNavigateHome={() => changeView('main')} />;
       case 'dashboard':
