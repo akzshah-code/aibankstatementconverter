@@ -9,11 +9,6 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq, onNavigateToApiDocs }) => {
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, handler: () => void) => {
-    e.preventDefault();
-    handler();
-  };
-
   return (
     <footer className="bg-gray-800 text-white">
       <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -21,24 +16,24 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms,
           &copy; {new Date().getFullYear()} AI Bank Statement Converter. All rights reserved.
         </p>
         <div className="flex justify-center flex-wrap items-center gap-x-6 gap-y-2 order-1 md:order-2">
-            <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToApiDocs)} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer border border-gray-500 rounded px-3 py-1 hover:border-white">
+            <button type="button" onClick={onNavigateToApiDocs} aria-label="Open API Documentation" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer border border-gray-500 rounded px-3 py-1 hover:border-white">
               API Docs
-            </a>
-            <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToAbout)} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+            </button>
+            <button type="button" onClick={onNavigateToAbout} aria-label="Open About page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               About
-            </a>
-            <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToTerms)} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+            </button>
+            <button type="button" onClick={onNavigateToTerms} aria-label="Open Terms of Service page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               Terms
-            </a>
-            <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToPrivacy)} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+            </button>
+            <button type="button" onClick={onNavigateToPrivacy} aria-label="Open Privacy Policy page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               Privacy
-            </a>
-            <a href="#" onClick={(e) => handleLinkClick(e, onNavigateToFaq)} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+            </button>
+            <button type="button" onClick={onNavigateToFaq} aria-label="Open FAQ page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               FAQ
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); alert('Coming soon!'); }} className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+            </button>
+            <button type="button" onClick={() => alert('Coming soon!')} aria-label="Open Blog" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               Blog
-            </a>
+            </button>
         </div>
       </div>
     </footer>
