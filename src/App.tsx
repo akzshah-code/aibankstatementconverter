@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -7,6 +8,8 @@ import Features from './components/Features';
 import BankSupport from './components/BankSupport';
 import Footer from './components/Footer';
 import { useUser } from './contexts/UserContext';
+import FAQ from './components/FAQ';
+import ApiDocs from './components/ApiDocs';
 
 // Lazy load components for different views to enable code-splitting
 const Pricing = lazy(() => import('./components/Pricing'));
@@ -17,8 +20,6 @@ const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const About = lazy(() => import('./components/About'));
-const FAQ = lazy(() => import('./components/FAQ'));
-const ApiDocs = lazy(() => import('./components/ApiDocs'));
 
 type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'privacy' | 'terms' | 'dashboard' | 'about' | 'faq' | 'api-docs';
 
@@ -91,9 +92,9 @@ const App: React.FC = () => {
       case 'about':
         return <About />;
       case 'faq':
-        return <FAQ onNavigateToFaq={() => changeView('faq')} />;
+        return <FAQ onNavigateToApiDocs={() => changeView('api-docs')} />;
       case 'api-docs':
-        return <ApiDocs onNavigateToApiDocs={() => changeView('api-docs')} />;
+        return <ApiDocs onNavigateHome={() => changeView('main')} />;
       case 'dashboard':
         return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'main':
@@ -135,7 +136,7 @@ const App: React.FC = () => {
         </Suspense>
       </main>
       {view !== 'api-docs' && (
-        <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} onNavigateToApiDocs={() => changeView('api-docs')} />
+        <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} />
       )}
     </div>
   );

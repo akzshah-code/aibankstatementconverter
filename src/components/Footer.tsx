@@ -5,10 +5,9 @@ interface FooterProps {
   onNavigateToTerms: () => void;
   onNavigateToAbout: () => void;
   onNavigateToFaq: () => void;
-  onNavigateToApiDocs: () => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq, onNavigateToApiDocs }) => {
+const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq }) => {
   return (
     <footer className="bg-gray-800 text-white">
       <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -16,9 +15,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms,
           &copy; {new Date().getFullYear()} AI Bank Statement Converter. All rights reserved.
         </p>
         <div className="flex justify-center flex-wrap items-center gap-x-6 gap-y-2 order-1 md:order-2">
-            <button type="button" onClick={onNavigateToApiDocs} aria-label="Open API Documentation" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer border border-gray-500 rounded px-3 py-1 hover:border-white">
-              API Docs
-            </button>
             <button type="button" onClick={onNavigateToAbout} aria-label="Open About page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               About
             </button>
