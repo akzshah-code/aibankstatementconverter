@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 
 interface FaqProps {
-    onNavigateToFaq: () => void;
 }
 
 interface FaqItemData {
@@ -34,7 +34,7 @@ const FaqItem: React.FC<{ item: FaqItemData, isOpen: boolean, onClick: () => voi
 };
 
 
-const FAQ: React.FC<FaqProps> = ({ onNavigateToFaq }) => {
+const FAQ: React.FC<FaqProps> = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(0); // Open first item by default
 
     const faqItems: FaqItemData[] = [
@@ -54,11 +54,7 @@ const FAQ: React.FC<FaqProps> = ({ onNavigateToFaq }) => {
             question: "Do you offer an API for integration?",
             answer: (
                 <>
-                    Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our{' '}
-                    <a href="#" onClick={(e) => { e.preventDefault(); onNavigateToApiDocs(); }} className="text-primary hover:underline font-semibold">
-                        API documentation is comprehensive
-                    </a>
-                    {' '}and we provide dedicated support for integration.
+                    Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Our API documentation is comprehensive and we provide dedicated support for integration.
                 </>
             )
         },

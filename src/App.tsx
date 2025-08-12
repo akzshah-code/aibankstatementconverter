@@ -9,7 +9,6 @@ import BankSupport from './components/BankSupport';
 import Footer from './components/Footer';
 import { useUser } from './contexts/UserContext';
 import FAQ from './components/FAQ';
-import ApiDocs from './components/ApiDocs';
 
 // Lazy load components for different views to enable code-splitting
 const Pricing = lazy(() => import('./components/Pricing'));
@@ -21,7 +20,7 @@ const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const About = lazy(() => import('./components/About'));
 
-type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'privacy' | 'terms' | 'dashboard' | 'about' | 'faq' | 'api-docs';
+type View = 'main' | 'pricing' | 'demo' | 'login' | 'register' | 'privacy' | 'terms' | 'dashboard' | 'about' | 'faq';
 
 const LoadingSpinner: React.FC = () => (
     <div className="flex justify-center items-center py-20 min-h-[calc(100vh-160px)]">
@@ -92,9 +91,7 @@ const App: React.FC = () => {
       case 'about':
         return <About />;
       case 'faq':
-        return <FAQ onNavigateToApiDocs={() => changeView('api-docs')} />;
-      case 'api-docs':
-        return <ApiDocs onNavigateHome={() => changeView('main')} />;
+        return <FAQ />;
       case 'dashboard':
         return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'main':
@@ -118,26 +115,22 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-white text-gray-800 font-sans">
-      {view !== 'api-docs' && (
-        <Header
-          user={user}
-          onLogout={handleLogout}
-          onShowPricingPage={() => changeView('pricing')}
-          onNavigateToLogin={() => changeView('login')}
-          onNavigateToRegister={() => changeView('register')}
-          onNavigateToDashboard={() => changeView('dashboard')}
-          onNavigateToConvert={() => navigateToMainPage(heroRef)}
-          onNavigateHome={() => navigateToMainPage()}
-        />
-      )}
-      <main className={view !== 'api-docs' ? "pt-20" : ""}>
+      <Header
+        user={user}
+        onLogout={handleLogout}
+        onShowPricingPage={() => changeView('pricing')}
+        onNavigateToLogin={() => changeView('login')}
+        onNavigateToRegister={() => changeView('register')}
+        onNavigateToDashboard={() => changeView('dashboard')}
+        onNavigateToConvert={() => navigateToMainPage(heroRef)}
+        onNavigateHome={() => navigateToMainPage()}
+      />
+      <main className="pt-20">
         <Suspense fallback={<LoadingSpinner />}>
           {renderContent()}
         </Suspense>
       </main>
-      {view !== 'api-docs' && (
-        <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} />
-      )}
+      <Footer onNavigateToPrivacy={() => changeView('privacy')} onNavigateToTerms={() => changeView('terms')} onNavigateToAbout={() => changeView('about')} onNavigateToFaq={() => changeView('faq')} />
     </div>
   );
 };
