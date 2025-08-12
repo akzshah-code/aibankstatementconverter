@@ -91,9 +91,9 @@ const App: React.FC = () => {
       case 'about':
         return <About />;
       case 'faq':
-        return <FAQ onNavigateToApiDocs={() => changeView('api-docs')} />;
+        return <FAQ onNavigateToFaq={() => changeView('faq')} />;
       case 'api-docs':
-        return <ApiDocs onNavigateHome={() => changeView('main')} />;
+        return <ApiDocs onNavigateToApiDocs={() => changeView('api-docs')} />;
       case 'dashboard':
         return user ? <Dashboard onNavigateToPricing={() => changeView('pricing')} /> : <Login onNavigateToRegister={() => changeView('register')} onLoginSuccess={handleLoginSuccess} />;
       case 'main':
