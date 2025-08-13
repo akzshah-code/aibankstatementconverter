@@ -1,3 +1,4 @@
+
 {
   "name": "ai-bank-statement-converter",
   "private": true,
@@ -9,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.13.0",
+    "@google/genai": "1.12.0",
     "pdf-lib": "^1.17.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
