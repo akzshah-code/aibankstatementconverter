@@ -21,12 +21,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!process.env.API_KEY) {
+        if (!import.meta.env.VITE_API_KEY) {
             setError("API key is not configured. Chat is disabled.");
             return;
         }
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
             const transactionContext = `Analyze the following bank transactions and answer questions about them. The data is in JSON format:\n\n${JSON.stringify(transactions, null, 2)}`;
             const chatInstance = ai.chats.create({
                 model: 'gemini-2.5-flash',

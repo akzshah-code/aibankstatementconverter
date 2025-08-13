@@ -1,3 +1,5 @@
+
+
 import React, { useState, useCallback, useRef } from 'react';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
@@ -175,7 +177,7 @@ const Converter: React.FC = () => {
     setError(null);
     
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY! });
         const base64Data = await fileToBase64(fileToProcess);
         
         const filePart = {
