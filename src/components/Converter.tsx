@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useRef } from 'react';
 import { Transaction } from '../lib/types';
 import ChatInterface from './ChatInterface';
@@ -277,57 +275,39 @@ const Converter: React.FC = () => {
     }
     await handleConversion(file);
   };
-
-  const handleUnlockAndConvert = async (e: React.FormEvent) => {
+  
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !password) { setError("Please enter a password."); return; }
+    if (!file || !password) {
+      setError("Please provide the file and password.");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
     setShowSecureWorkaround(false);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('password', password);
-
     try {
-      // This endpoint is hypothetical. It would need to be implemented on a backend server
-      // that can run a tool like 'qpdf' for robust decryption.
-      const response = await fetch('/api/unlock-pdf', {
-        method: 'POST',
-        body: formData,
-      });
+      const fileBuffer = await fileToArrayBuffer(file);
+      // Attempt to load with the password. This will throw an error if incorrect.
+      const pdfDoc = await PDFDocument.load(fileBuffer, { password } as any);
 
-      if (!response.ok) {
-        // Try to parse error message from backend
-        const errorData = await response.json().catch(() => ({ message: `Server error: ${response.statusText}` }));
-        
-        if (response.status === 400) { // e.g., Bad Request for incorrect password
-           setError(errorData.message || 'Incorrect password. If you are certain the password is correct, the file may use an encryption method not supported by our backend.');
-           setShowSecureWorkaround(true);
-        } else {
-           throw new Error(errorData.message || `Server error: ${response.status}`);
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      const unlockedPdfBlob = await response.blob();
-      const unlockedFile = new File([unlockedPdfBlob], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
+      // If we reach here, the PDF is unlocked.
+      const unlockedPdfBytes = await pdfDoc.save();
+      const unlockedFile = new File([unlockedPdfBytes], file.name.replace(/\.pdf$/i, '-unlocked.pdf'), { type: 'application/pdf' });
       
-      setShowPasswordPrompt(false);
-      setPassword('');
+      // Update the file in state and proceed with the standard conversion flow.
       setFile(unlockedFile);
-      // Now that the file is "unlocked", proceed with Gemini conversion
-      await handleConversion(unlockedFile);
+      // The handleConversion function will take care of the rest, including turning off the loading spinner.
+      await handleConversion(unlockedFile); 
 
-    } catch (err: any) {
-      console.error("Unlock process failed:", err);
-      setIsLoading(false);
-      // This will catch network errors or if the backend isn't running
-      const errorMessage = err.message || 'An unknown error occurred during the unlock process.';
-      setError(`Unlock Failed: ${errorMessage}. Please ensure the backend server is running and accessible.`);
-      setShowPasswordPrompt(true); // Keep the prompt open for another attempt
+    } catch (err) {
+      console.error("PDF unlock failed in browser:", err);
+      // The password was likely incorrect, or the encryption is not supported by pdf-lib.
+      setError("Incorrect password or the PDF uses an unsupported encryption type.");
+      setShowSecureWorkaround(true);
+      setIsLoading(false); // Stop loading to allow another attempt.
+      setShowPasswordPrompt(true); // Keep the prompt open.
     }
   };
   
@@ -446,7 +426,7 @@ const Converter: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleUnlockAndConvert} className="space-y-4 mt-4">
+          <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-4">
               <div>
                   <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-4"><i className="fas fa-lock text-gray-400"></i></span>
@@ -465,7 +445,7 @@ const Converter: React.FC = () => {
               <div className="flex justify-between items-center pt-2">
                   <button onClick={resetConverter} type="button" className="text-sm text-gray-600 hover:text-primary font-semibold">Cancel</button>
                   <button type="submit" disabled={isLoading} className="bg-primary text-white font-bold py-2.5 px-6 rounded-lg hover:bg-primary-hover transition-colors shadow-md flex items-center gap-2 disabled:bg-gray-400">
-                      {isLoading ? <><div className="w-5 h-5 border-2 border-dashed rounded-full animate-spin border-white"></div> Unlocking...</> : <><i className="fas fa-unlock-alt"></i> Try Unlock & Convert</>}
+                      {isLoading ? <><div className="w-5 h-5 border-2 border-dashed rounded-full animate-spin border-white"></div> Unlocking...</> : <><i className="fas fa-unlock-alt"></i> Unlock & Convert</>}
                   </button>
               </div>
           </form>
