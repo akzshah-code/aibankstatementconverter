@@ -15,6 +15,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms,
         <p className="text-gray-400 text-sm order-2 md:order-1 text-center md:text-left">
           &copy; {new Date().getFullYear()} AI Bank Statement Converter. All rights reserved.
         </p>
+        {/* API Docs link intentionally removed as per request */}
         <div className="flex justify-center flex-wrap items-center gap-x-6 gap-y-2 order-1 md:order-2">
             <button type="button" onClick={onNavigateToAbout} aria-label="Open About page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               About

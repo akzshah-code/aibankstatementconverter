@@ -51,10 +51,6 @@ const FAQ: React.FC<FaqProps> = () => {
             answer: "We accept PDF, JPG, and PNG files for conversion. If you upload a password-protected PDF, our tool will prompt you to enter the password to unlock it for processing. If the password fails, it may be due to advanced encryption. In that case, you can securely unlock it yourself by opening the file in your browser or Adobe Reader, pressing Ctrl+P (or Cmd+P), choosing 'Save as PDF', and then uploading the new, unlocked file to our converter."
         },
         {
-            question: "Do you offer an API for integration?",
-            answer: "Yes, we offer a robust API as part of our Pro plan. You can integrate AI Bank Statement Converter directly with your accounting software, ERP, or custom applications. Contact us for more details."
-        },
-        {
             question: "Which banks do you support?",
             answer: "We currently support all major Indian banks including HDFC, ICICI, SBI, Axis, Kotak, IDFC FIRST, and more. New formats are added every month. If your bank isn't listed, contact us and we'll prioritize adding it."
         },
