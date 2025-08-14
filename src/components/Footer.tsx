@@ -6,16 +6,16 @@ interface FooterProps {
   onNavigateToTerms: () => void;
   onNavigateToAbout: () => void;
   onNavigateToFaq: () => void;
+  onNavigateToApiDocs: () => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq }) => {
+const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms, onNavigateToAbout, onNavigateToFaq, onNavigateToApiDocs }) => {
   return (
     <footer className="bg-gray-800 text-white">
       <div className="container mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-gray-400 text-sm order-2 md:order-1 text-center md:text-left">
           &copy; {new Date().getFullYear()} AI Bank Statement Converter. All rights reserved.
         </p>
-        {/* API Docs link intentionally removed as per request */}
         <div className="flex justify-center flex-wrap items-center gap-x-6 gap-y-2 order-1 md:order-2">
             <button type="button" onClick={onNavigateToAbout} aria-label="Open About page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               About
@@ -28,6 +28,9 @@ const Footer: React.FC<FooterProps> = ({ onNavigateToPrivacy, onNavigateToTerms,
             </button>
             <button type="button" onClick={onNavigateToFaq} aria-label="Open FAQ page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               FAQ
+            </button>
+            <button type="button" onClick={onNavigateToApiDocs} aria-label="Open API Docs page" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
+              API
             </button>
             <button type="button" onClick={() => alert('Coming soon!')} aria-label="Open Blog" className="text-gray-300 hover:text-white transition-colors duration-300 cursor-pointer">
               Blog

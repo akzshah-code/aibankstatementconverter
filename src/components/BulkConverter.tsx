@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Transaction } from '@/lib/types';
 import { useUser } from '@/contexts/UserContext';
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 import { PDFDocument } from 'pdf-lib';
 
 // --- Types & Interfaces ---
@@ -169,7 +169,6 @@ const BulkConverter: React.FC = () => {
         }
         
         try {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY! });
             const base64Data = await fileToBase64(currentFile);
             const filePart = { inlineData: { data: base64Data, mimeType: currentFile.type } };
 
@@ -183,13 +182,26 @@ const BulkConverter: React.FC = () => {
                 }
             };
 
-            const response = await ai.models.generateContent({
+            const requestBody = {
                 model: 'gemini-2.5-flash',
                 contents: { parts: [filePart, { text: 'Analyze this bank statement and extract all transactions into a structured JSON according to the schema. Clean the narration field by removing redundant info.' }] },
                 config: { responseMimeType: "application/json", responseSchema: schema }
-            });
+            };
 
+            const apiResponse = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+            });
+    
+            if (!apiResponse.ok) {
+                const errorData = await apiResponse.json();
+                throw new Error(errorData.details || `Request failed with status ${apiResponse.status}`);
+            }
+
+            const response = await apiResponse.json();
             const jsonData = JSON.parse(response.text);
+
             let numPages = 1;
             if (currentFile.type === 'application/pdf') {
                 const pdfBytes = await fileToArrayBuffer(currentFile);

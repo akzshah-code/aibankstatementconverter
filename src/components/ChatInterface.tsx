@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Transaction } from '@/lib/types';
-import { GoogleGenAI, Chat } from '@google/genai';
 
 interface ChatInterfaceProps {
     transactions: Transaction[];
@@ -18,30 +17,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
     const [userInput, setUserInput] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [chat, setChat] = useState<Chat | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!import.meta.env.VITE_API_KEY) {
-            setError("API key is not configured. Chat is disabled.");
-            return;
-        }
-        try {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
-            const transactionContext = `Analyze the following bank transactions and answer questions about them. The data is in JSON format:\n\n${JSON.stringify(transactions, null, 2)}`;
-            const chatInstance = ai.chats.create({
-                model: 'gemini-2.5-flash',
-                history: [
-                    { role: 'user', parts: [{ text: transactionContext }] },
-                    { role: 'model', parts: [{ text: "I have your transaction data. What would you like to know?" }] }
-                ]
-            });
-            setChat(chatInstance);
-        } catch (err: unknown) {
-            console.error("Chat initialization failed:", err);
-            setError("Could not initialize AI chat session.");
-        }
-    }, [transactions]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -51,7 +27,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!userInput.trim() || isLoading || !chat) return;
+        if (!userInput.trim() || isLoading) return;
 
         const userMessage: Message = { role: 'user', text: userInput };
         setMessages(prev => [...prev, userMessage]);
@@ -61,8 +37,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
         setError(null);
         
         try {
-            const response = await chat.sendMessage({ message: currentInput });
-            const modelMessage: Message = { role: 'model', text: response.text };
+            const transactionContext = `Analyze the following bank transactions and answer questions about them. The data is in JSON format:\n\n${JSON.stringify(transactions, null, 2)}`;
+            
+            // Reconstruct history from component's `messages` state
+            const historyForApi = [
+                { role: 'user', parts: [{ text: transactionContext }] },
+                ...messages.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
+                { role: 'user', parts: [{ text: currentInput }] }
+            ];
+
+            const requestBody = {
+                model: 'gemini-2.5-flash',
+                contents: historyForApi
+            };
+
+            const apiResponse = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+            });
+    
+            if (!apiResponse.ok) {
+                const errorData = await apiResponse.json();
+                throw new Error(errorData.details || `Request failed with status ${apiResponse.status}`);
+            }
+
+            const responseData = await apiResponse.json();
+            const modelMessage: Message = { role: 'model', text: responseData.text };
             setMessages(prev => [...prev, modelMessage]);
 
         } catch (err: unknown) {
@@ -108,10 +109,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ transactions }) => {
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="e.g., What was my total spending?"
                     className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100"
-                    disabled={isLoading || !chat}
+                    disabled={isLoading}
                     aria-label="Chat input"
                 />
-                <button type="submit" className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed" disabled={isLoading || !userInput.trim() || !chat}>
+                <button type="submit" className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-hover disabled:bg-gray-400 disabled:cursor-not-allowed" disabled={isLoading || !userInput.trim()}>
                     <i className="fas fa-paper-plane"></i>
                     <span className="sr-only">Send Message</span>
                 </button>
