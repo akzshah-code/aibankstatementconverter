@@ -1,5 +1,7 @@
+
+
 import React, { useState } from 'react';
-import { User } from '../lib/types';
+import { User } from '@/lib/types';
 
 interface HeaderProps {
   user: User | null;
@@ -10,10 +12,11 @@ interface HeaderProps {
   onNavigateToConvert: () => void;
   onNavigateHome: () => void;
   onNavigateToDashboard: () => void;
+  onNavigateToBulkConvert: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
-  user, onLogout, onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToConvert, onNavigateHome, onNavigateToDashboard
+  user, onLogout, onShowPricingPage, onNavigateToLogin, onNavigateToRegister, onNavigateToConvert, onNavigateHome, onNavigateToDashboard, onNavigateToBulkConvert
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -40,9 +43,14 @@ const Header: React.FC<HeaderProps> = ({
             Pricing
           </a>
           {user ? (
+            <>
+              <a href="#bulk-convert" onClick={handleLinkClick(onNavigateToBulkConvert)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
+                Bulk Convert
+              </a>
               <a href="#dashboard" onClick={handleLinkClick(onNavigateToDashboard)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
                 Dashboard
               </a>
+            </>
           ) : (
               <a href="#login" onClick={handleLinkClick(onNavigateToLogin)} className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium cursor-pointer">
                 Login
@@ -87,6 +95,7 @@ const Header: React.FC<HeaderProps> = ({
               <a href="#pricing" onClick={handleLinkClick(onShowPricingPage)} className="text-gray-600 hover:text-primary font-medium">Pricing</a>
               {user ? (
                  <>
+                  <a href="#bulk-convert" onClick={handleLinkClick(onNavigateToBulkConvert)} className="text-gray-600 hover:text-primary font-medium">Bulk Convert</a>
                   <a href="#dashboard" onClick={handleLinkClick(onNavigateToDashboard)} className="text-gray-600 hover:text-primary font-medium">Dashboard</a>
                   <a 
                     href="#"

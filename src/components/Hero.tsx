@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 
-const Converter = lazy(() => import('./Converter'));
+const Converter = lazy(() => import('@/components/Converter'));
 
 interface HeroProps {
   onTryDemo: () => void;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useUser } from '../contexts/UserContext';
-import { ConversionHistoryItem } from '../lib/types';
+import { useUser } from '@/contexts/UserContext';
+import { ConversionHistoryItem } from '@/lib/types';
 
 interface DashboardProps {
     onNavigateToPricing: () => void;

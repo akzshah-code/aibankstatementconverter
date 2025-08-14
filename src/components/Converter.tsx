@@ -1,9 +1,9 @@
 
 
 import React, { useState, useCallback, useRef } from 'react';
-import { Transaction } from '../lib/types';
-import ChatInterface from './ChatInterface';
-import { useUser } from '../contexts/UserContext';
+import { Transaction } from '@/lib/types';
+import ChatInterface from '@/components/ChatInterface';
+import { useUser } from '@/contexts/UserContext';
 import { GoogleGenAI, Type } from "@google/genai";
 import { PDFDocument } from 'pdf-lib';
 

@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Transaction } from '../lib/types';
+import { Transaction } from '@/lib/types';
 import { GoogleGenAI, Chat } from '@google/genai';
 
 interface ChatInterfaceProps {

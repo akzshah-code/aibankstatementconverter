@@ -1,6 +1,6 @@
 import React from 'react';
-import { demoTransactions } from '../lib/demo-data';
-import { Transaction } from '../lib/types';
+import { demoTransactions } from '@/lib/demo-data';
+import { Transaction } from '@/lib/types';
 
 // Utility functions for data conversion and download
 const jsonToCsv = (jsonData: Transaction[], headers: Record<keyof Transaction, string>): string => {

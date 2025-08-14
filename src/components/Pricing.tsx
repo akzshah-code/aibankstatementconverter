@@ -1,6 +1,8 @@
+
+
 import React, { useState, useEffect, useCallback } from 'react';
-import { useUser, PLANS } from '../contexts/UserContext';
-import { PlanName } from '../lib/types';
+import { useUser, PLANS } from '@/contexts/UserContext';
+import { PlanName } from '@/lib/types';
 
 // Augment window interface for Razorpay
 declare global {
