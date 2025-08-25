@@ -42,7 +42,13 @@ const Header = ({ user, onLogout }: HeaderProps) => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <a href="/#" className="flex items-center space-x-2">
-              <img src="/logo.png" alt="BankConverts Logo" className="h-8 w-8" />
+              <svg className="h-8 w-8" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2h13.5l6.5 6.5v19.5c0 1.1-.9 2-2 2h-18c-1.1 0-2-.9-2-2v-24c0-1.1.9-2 2-2z" fill="#0052cc"/>
+                <path d="M19 2v7h7l-7-7z" fill="#66a3ff"/>
+                <path d="M14 16h-1.5c-.8 0-1.5-.7-1.5-1.5v-1c0-.8.7-1.5 1.5-1.5h3c.8 0 1.5.7 1.5 1.5v3c0 .8-.7 1.5-1.5 1.5h-1.5m-1-5v6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                <path d="M17 20h10v10h-10z" fill="#108934"/>
+                <path d="M19 22l6 6m0-6l-6 6" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
               <span className="font-bold text-xl text-brand-dark">BankConverts</span>
             </a>
           </div>
