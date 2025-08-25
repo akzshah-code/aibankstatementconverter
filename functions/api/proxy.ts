@@ -3,16 +3,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 // This is a serverless function that acts as a proxy to the Google AI API.
 // It's designed to be deployed on a platform like Cloudflare Pages/Workers, Vercel, or Netlify.
 
-// IMPORTANT: Set your API_KEY in your deployment environment's secrets.
-// NEVER expose this key on the client side.
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable is not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 // Define the expected JSON structure for the AI's response.
 const responseSchema = {
   type: Type.ARRAY,
@@ -44,8 +34,18 @@ const responseSchema = {
   },
 };
 
-export const onRequestPost = async ({ request }) => {
+export const onRequestPost = async ({ request, env }) => {
   try {
+    // IMPORTANT: Set your API_KEY in your deployment environment's secrets.
+    // In Cloudflare, it's accessed via the `env` object in the function context.
+    const API_KEY = env.API_KEY;
+
+    if (!API_KEY) {
+      throw new Error("API_KEY environment variable is not set in Cloudflare secrets.");
+    }
+
+    const ai = new GoogleGenAI({ apiKey: API_KEY });
+
     const { image, mimeType } = await request.json();
 
     if (!image || !mimeType) {
