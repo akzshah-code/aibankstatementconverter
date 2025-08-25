@@ -4,11 +4,17 @@ import BankSupport from '../components/BankSupport';
 import UsageTiers from '../components/UsageTiers';
 import CallToAction from '../components/CallToAction';
 import Footer from '../components/Footer';
+import { User } from '../lib/types';
 
-const LandingPage = () => {
+interface LandingPageProps {
+  user: User | null;
+  onLogout: () => void;
+}
+
+const LandingPage = ({ user, onLogout }: LandingPageProps) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Header user={user} onLogout={onLogout} />
       <main className="flex-grow">
         <Hero />
         <BankSupport />

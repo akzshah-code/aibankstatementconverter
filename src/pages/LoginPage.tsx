@@ -2,12 +2,16 @@ import Header from '../components/Header';
 import Login from '../components/Login';
 import Footer from '../components/Footer';
 
-const LoginPage = () => {
+interface LoginPageProps {
+  onLogin: (email: string) => void;
+}
+
+const LoginPage = ({ onLogin }: LoginPageProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+      <Header user={null} onLogout={() => {}} />
       <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <Login />
+        <Login onLogin={onLogin} />
       </main>
       <Footer />
     </div>
