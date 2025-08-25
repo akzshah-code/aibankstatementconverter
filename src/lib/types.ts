@@ -28,3 +28,11 @@ export interface EmailTemplate {
   trigger: string;
   active: boolean;
 }
+
+export interface EmailRoute {
+  id: string;
+  address: string;
+  action: string;
+  destination: string;
+  active: boolean;
+}

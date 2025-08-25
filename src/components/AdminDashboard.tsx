@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { User, BlogPost, EmailTemplate } from "../lib/types";
+import { User, BlogPost, EmailTemplate, EmailRoute } from "../lib/types";
 import UserManagement from "./admin/UserManagement";
 import BlogManagement from "./admin/BlogManagement";
 import EmailAutomations from "./admin/EmailAutomations";
+import EmailRouting from "./admin/EmailRouting";
 
 interface AdminDashboardProps {
     user: User | null;
     users: User[];
     posts: BlogPost[];
     templates: EmailTemplate[];
+    routes: EmailRoute[];
     setUsers: React.Dispatch<React.SetStateAction<User[]>>;
     setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
     setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
+    setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
 }
 
 const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, value: string | number }) => (
@@ -27,7 +30,7 @@ const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, va
 );
 
 
-const AdminDashboard = ({ user, users, posts, templates, setUsers, setPosts, setTemplates }: AdminDashboardProps) => {
+const AdminDashboard = ({ user, users, posts, templates, routes, setUsers, setPosts, setTemplates, setRoutes }: AdminDashboardProps) => {
     const [activeTab, setActiveTab] = useState('users');
 
     if (!user || user.role !== 'admin') return null;
@@ -36,6 +39,7 @@ const AdminDashboard = ({ user, users, posts, templates, setUsers, setPosts, set
         { id: 'users', label: 'User Management' },
         { id: 'blog', label: 'Blog Management' },
         { id: 'emails', label: 'Email Automations' },
+        { id: 'routing', label: 'Email Routing' },
     ];
     
     // Calculate stats from props
@@ -103,6 +107,7 @@ const AdminDashboard = ({ user, users, posts, templates, setUsers, setPosts, set
                 {activeTab === 'users' && <UserManagement users={users} setUsers={setUsers} />}
                 {activeTab === 'blog' && <BlogManagement posts={posts} setPosts={setPosts} />}
                 {activeTab === 'emails' && <EmailAutomations templates={templates} setTemplates={setTemplates} />}
+                {activeTab === 'routing' && <EmailRouting routes={routes} setRoutes={setRoutes} />}
             </div>
 
         </div>

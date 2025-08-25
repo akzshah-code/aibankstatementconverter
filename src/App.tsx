@@ -7,18 +7,31 @@ import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
-import { User, BlogPost, EmailTemplate } from './lib/types';
-import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates } from './lib/mock-data';
+import { User, BlogPost, EmailTemplate, EmailRoute } from './lib/types';
+import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
 
 function App() {
   const [route, setRoute] = useState(window.location.hash);
-  const [user, setUser] = useState<User | null>(null);
+  
+  // Initialize user state from localStorage to persist login across refreshes
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const savedUser = localStorage.getItem('loggedInUser');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+      return null;
+    }
+  });
   
   // Centralized state for mock data
   const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
   const [allPosts, setAllPosts] = useState<BlogPost[]>(initialBlogPosts);
   const [allTemplates, setAllTemplates] = useState<EmailTemplate[]>(initialEmailTemplates);
+  const [allRoutes, setAllRoutes] = useState<EmailRoute[]>(initialEmailRoutes);
 
+
+  // Effect to handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
       setRoute(window.location.hash);
@@ -32,6 +45,19 @@ function App() {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
+
+  // Effect to save user to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('loggedInUser');
+      }
+    } catch (error) {
+      console.error("Failed to save user to localStorage", error);
+    }
+  }, [user]);
 
   const handleLogin = (email: string) => {
     const foundUser = allUsers.find(u => u.email === email);
@@ -96,9 +122,11 @@ function App() {
             users={allUsers}
             posts={allPosts}
             templates={allTemplates}
+            routes={allRoutes}
             setUsers={setAllUsers}
             setPosts={setAllPosts}
             setTemplates={setAllTemplates}
+            setRoutes={setAllRoutes}
           />
         );
       default:

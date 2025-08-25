@@ -1,7 +1,7 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AdminDashboard from '../components/AdminDashboard';
-import { User, BlogPost, EmailTemplate } from '../lib/types';
+import { User, BlogPost, EmailTemplate, EmailRoute } from '../lib/types';
 
 interface AdminPageProps {
   user: User | null;
@@ -9,12 +9,14 @@ interface AdminPageProps {
   users: User[];
   posts: BlogPost[];
   templates: EmailTemplate[];
+  routes: EmailRoute[];
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
   setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
   setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
+  setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
 }
 
-const AdminPage = ({ user, onLogout, users, posts, templates, setUsers, setPosts, setTemplates }: AdminPageProps) => {
+const AdminPage = ({ user, onLogout, users, posts, templates, routes, setUsers, setPosts, setTemplates, setRoutes }: AdminPageProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
@@ -24,9 +26,11 @@ const AdminPage = ({ user, onLogout, users, posts, templates, setUsers, setPosts
           users={users}
           posts={posts}
           templates={templates}
+          routes={routes}
           setUsers={setUsers}
           setPosts={setPosts}
           setTemplates={setTemplates}
+          setRoutes={setRoutes}
         />
       </main>
       <Footer />

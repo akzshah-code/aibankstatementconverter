@@ -1,4 +1,4 @@
-import { User, BlogPost, EmailTemplate } from './types';
+import { User, BlogPost, EmailTemplate, EmailRoute } from './types';
 
 export const users: User[] = [
   {
@@ -71,4 +71,42 @@ export const emailTemplates: EmailTemplate[] = [
         trigger: '7 Days Before Renewal',
         active: false,
     }
+];
+
+export const emailRoutes: EmailRoute[] = [
+    {
+        id: 'route_001',
+        address: 'noreply@bankconverts.com',
+        action: 'Send to an email',
+        destination: 'iamshahkarimabdul@gmail.com',
+        active: true,
+    },
+    {
+        id: 'route_002',
+        address: 'contact@bankconverts.com',
+        action: 'Send to an email',
+        destination: 'iamshahkarimabdul@gmail.com',
+        active: true,
+    },
+    {
+        id: 'route_003',
+        address: 'support@bankconverts.com',
+        action: 'Send to an email',
+        destination: 'iamshahkarimabdul@gmail.com',
+        active: true,
+    },
+    {
+        id: 'route_004',
+        address: 'info@bankconverts.com',
+        action: 'Send to an email',
+        destination: 'iamshahkarimabdul@gmail.com',
+        active: true,
+    },
+    {
+        id: 'route_005',
+        address: 'admin@bankconverts.com',
+        action: 'Send to an email',
+        destination: 'iamshahkarimabdul@gmail.com',
+        active: true,
+    },
 ];
