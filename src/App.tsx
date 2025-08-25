@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import LandingPage from './pages/LandingPage';
 import PricingPage from './pages/PricingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   // Simple hash-based routing
@@ -25,6 +27,10 @@ function App() {
     switch (route) {
       case '#pricing':
         return <PricingPage />;
+      case '#login':
+        return <LoginPage />;
+      case '#register':
+        return <RegisterPage />;
       default:
         return <LandingPage />;
     }

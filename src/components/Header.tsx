@@ -4,7 +4,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '#convert', label: 'Convert' },
+    { href: '#/', label: 'Convert' },
     { href: '#pricing', label: 'Pricing' },
     { href: '#blog', label: 'Blog' },
     { href: '#login', label: 'Login' },
@@ -15,7 +15,7 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2">
+            <a href="/#" className="flex items-center space-x-2">
               <svg className="h-8 w-8 text-brand-purple" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V4m0 16v-2M8 9a4 4 0 108 0 4 4 0 00-8 0z" />
               </svg>
