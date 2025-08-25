@@ -36,14 +36,16 @@ export const blogPosts: BlogPost[] = [
         title: 'How to Maximize Your Financial Data',
         author: 'Admin',
         date: '2024-08-15',
-        excerpt: 'Learn the best practices for converting and analyzing your bank statements...'
+        excerpt: 'Learn the best practices for converting and analyzing your bank statements to gain valuable insights into your financial health...',
+        content: 'Learn the best practices for converting and analyzing your bank statements to gain valuable insights into your financial health. In this post, we will cover topics such as choosing the right format, cleaning your data, and using advanced tools for analysis. By the end, you will be able to turn raw data into actionable intelligence.'
     },
     {
         id: 'post_002',
         title: 'Understanding CSV vs. Excel for Financial Analysis',
         author: 'Admin',
         date: '2024-07-30',
-        excerpt: 'A deep dive into the pros and cons of each format for your financial needs...'
+        excerpt: 'A deep dive into the pros and cons of each format for your financial needs, helping you decide which is best for your workflow...',
+        content: 'A deep dive into the pros and cons of each format for your financial needs, helping you decide which is best for your workflow. We compare CSV and Excel based on file size, compatibility, features, and ease of use. This guide will help you make an informed decision for your financial data management strategy.'
     }
 ];
 
@@ -69,4 +71,4 @@ export const emailTemplates: EmailTemplate[] = [
         trigger: '7 Days Before Renewal',
         active: false,
     }
-]
+];

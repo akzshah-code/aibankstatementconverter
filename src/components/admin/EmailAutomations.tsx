@@ -1,22 +1,39 @@
 import { useState } from 'react';
-import { emailTemplates as initialTemplates } from '../../lib/mock-data';
 import { EmailTemplate } from '../../lib/types';
 import EditEmailModal from './EditEmailModal';
+import AddEmailModal from './AddEmailModal';
 
-const EmailAutomations = () => {
-    const [templates, setTemplates] = useState<EmailTemplate[]>(initialTemplates);
+interface EmailAutomationsProps {
+    templates: EmailTemplate[];
+    setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
+}
+
+const EmailAutomations = ({ templates, setTemplates }: EmailAutomationsProps) => {
     const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const handleSaveTemplate = (updatedTemplate: EmailTemplate) => {
-        setTemplates(templates.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
+        setTemplates(prevTemplates => prevTemplates.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
         setEditingTemplate(null);
+    };
+    
+    const handleSaveNewTemplate = (newTemplateData: Omit<EmailTemplate, 'id'>) => {
+        const newTemplate: EmailTemplate = {
+            ...newTemplateData,
+            id: `email_${Date.now()}`,
+        };
+        setTemplates(prevTemplates => [newTemplate, ...prevTemplates]);
+        setIsAddModalOpen(false);
     };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-brand-dark">Email Automations</h2>
-                <button className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
+                <button 
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+                >
                     New Template
                 </button>
             </div>
@@ -54,6 +71,7 @@ const EmailAutomations = () => {
                 </table>
             </div>
             {editingTemplate && <EditEmailModal template={editingTemplate} onSave={handleSaveTemplate} onClose={() => setEditingTemplate(null)} />}
+            {isAddModalOpen && <AddEmailModal onSave={handleSaveNewTemplate} onClose={() => setIsAddModalOpen(false)} />}
         </div>
     );
 };

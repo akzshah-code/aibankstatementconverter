@@ -1,22 +1,47 @@
 import { useState } from 'react';
-import { blogPosts as initialPosts } from '../../lib/mock-data';
 import { BlogPost } from '../../lib/types';
 import EditBlogPostModal from './EditBlogPostModal';
+import AddBlogPostModal from './AddBlogPostModal';
 
-const BlogManagement = () => {
-    const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
+interface BlogManagementProps {
+    posts: BlogPost[];
+    setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
+}
+
+const BlogManagement = ({ posts, setPosts }: BlogManagementProps) => {
     const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const handleSavePost = (updatedPost: BlogPost) => {
-        setPosts(posts.map(post => post.id === updatedPost.id ? updatedPost : post));
+        setPosts(prevPosts => prevPosts.map(post => post.id === updatedPost.id ? updatedPost : post));
         setEditingPost(null);
+    };
+
+    const handleSaveNewPost = (newPostData: Omit<BlogPost, 'id' | 'date'>) => {
+        const newPost: BlogPost = {
+            ...newPostData,
+            content: newPostData.excerpt, // Use excerpt as content for now
+            id: `post_${Date.now()}`,
+            date: new Date().toISOString().split('T')[0], // Set current date
+        };
+        setPosts(prevPosts => [newPost, ...prevPosts]);
+        setIsAddModalOpen(false);
+    };
+    
+    const handleDeletePost = (postId: string) => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+        }
     };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-brand-dark">Manage Blog Posts</h2>
-                <button className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
+                <button 
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+                >
                     New Post
                 </button>
             </div>
@@ -40,7 +65,7 @@ const BlogManagement = () => {
                          <button onClick={() => setEditingPost(post)} className="font-medium text-brand-purple hover:text-brand-purple/80">
                             Edit
                         </button>
-                         <button className="font-medium text-red-500 hover:text-red-500/80">
+                         <button onClick={() => handleDeletePost(post.id)} className="font-medium text-red-500 hover:text-red-500/80">
                             Delete
                         </button>
                         </td>
@@ -50,6 +75,7 @@ const BlogManagement = () => {
                 </table>
             </div>
             {editingPost && <EditBlogPostModal post={editingPost} onSave={handleSavePost} onClose={() => setEditingPost(null)} />}
+            {isAddModalOpen && <AddBlogPostModal onSave={handleSaveNewPost} onClose={() => setIsAddModalOpen(false)} />}
         </div>
     );
 };

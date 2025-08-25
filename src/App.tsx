@@ -5,12 +5,19 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
-import { User } from './lib/types';
-import { users } from './lib/mock-data';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
+import { User, BlogPost, EmailTemplate } from './lib/types';
+import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates } from './lib/mock-data';
 
 function App() {
   const [route, setRoute] = useState(window.location.hash);
   const [user, setUser] = useState<User | null>(null);
+  
+  // Centralized state for mock data
+  const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
+  const [allPosts, setAllPosts] = useState<BlogPost[]>(initialBlogPosts);
+  const [allTemplates, setAllTemplates] = useState<EmailTemplate[]>(initialEmailTemplates);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -27,7 +34,7 @@ function App() {
   }, []);
 
   const handleLogin = (email: string) => {
-    const foundUser = users.find(u => u.email === email);
+    const foundUser = allUsers.find(u => u.email === email);
     if (foundUser) {
       setUser(foundUser);
       window.location.hash = foundUser.role === 'admin' ? '#admin' : '#dashboard';
@@ -43,6 +50,7 @@ function App() {
         planRenews: 'N/A',
       };
       setUser(standardUser);
+      setAllUsers([...allUsers, standardUser]); // Add new user to our mock data state
       window.location.hash = '#dashboard';
     }
   };
@@ -62,6 +70,12 @@ function App() {
     if (user?.role !== 'admin' && route === '#admin') {
       return <DashboardPage user={user} onLogout={handleLogout} />;
     }
+    
+    // Blog Post Detail Page Route
+    if (route.startsWith('#blog/')) {
+      const postId = route.split('/')[1];
+      return <BlogPostPage posts={allPosts} postId={postId} user={user} onLogout={handleLogout} />;
+    }
 
     switch (route) {
       case '#pricing':
@@ -72,8 +86,21 @@ function App() {
         return <RegisterPage />;
       case '#dashboard':
         return <DashboardPage user={user} onLogout={handleLogout} />;
+      case '#blog':
+        return <BlogPage posts={allPosts} user={user} onLogout={handleLogout} />;
       case '#admin':
-        return <AdminPage user={user} onLogout={handleLogout} />;
+        return (
+          <AdminPage
+            user={user}
+            onLogout={handleLogout}
+            users={allUsers}
+            posts={allPosts}
+            templates={allTemplates}
+            setUsers={setAllUsers}
+            setPosts={setAllPosts}
+            setTemplates={setAllTemplates}
+          />
+        );
       default:
         return <LandingPage user={user} onLogout={handleLogout} />;
     }

@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { users as initialUsers } from '../../lib/mock-data';
 import { User } from '../../lib/types';
 import EditUserModal from './EditUserModal';
 
-const UserManagement = () => {
-  const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
+interface UserManagementProps {
+  users: User[];
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+}
+
+const UserManagement = ({ users, setUsers }: UserManagementProps) => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const handleSaveUser = (updatedUser: User) => {
-    setAllUsers(allUsers.map(user => user.id === updatedUser.id ? updatedUser : user));
+    setUsers(prevUsers => prevUsers.map(user => user.id === updatedUser.id ? updatedUser : user));
     setEditingUser(null); // Close modal on save
   };
 
@@ -27,7 +30,7 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {allUsers.map(user => (
+            {users.map(user => (
               <tr key={user.id} className="border-b hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="font-semibold">{user.name} {user.role === 'admin' && '(Admin)'}</div>

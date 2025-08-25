@@ -17,6 +17,8 @@ export interface BlogPost {
   author: string;
   date: string;
   excerpt: string;
+  content: string; // Full content for the blog post page
+  featuredImage?: string; // Store the name or path of the image
 }
 
 export interface EmailTemplate {

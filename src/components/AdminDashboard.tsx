@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { User } from "../lib/types";
-import { users } from "../lib/mock-data";
+import { User, BlogPost, EmailTemplate } from "../lib/types";
 import UserManagement from "./admin/UserManagement";
 import BlogManagement from "./admin/BlogManagement";
 import EmailAutomations from "./admin/EmailAutomations";
 
 interface AdminDashboardProps {
     user: User | null;
+    users: User[];
+    posts: BlogPost[];
+    templates: EmailTemplate[];
+    setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+    setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
+    setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
 }
 
 const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, value: string | number }) => (
@@ -22,7 +27,7 @@ const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, va
 );
 
 
-const AdminDashboard = ({ user }: AdminDashboardProps) => {
+const AdminDashboard = ({ user, users, posts, templates, setUsers, setPosts, setTemplates }: AdminDashboardProps) => {
     const [activeTab, setActiveTab] = useState('users');
 
     if (!user || user.role !== 'admin') return null;
@@ -33,7 +38,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
         { id: 'emails', label: 'Email Automations' },
     ];
     
-    // Calculate stats from mock data
+    // Calculate stats from props
     const totalUsers = users.length;
     const professionalPlans = users.filter(u => u.plan === 'Professional').length;
     const starterPlans = users.filter(u => u.plan === 'Starter').length;
@@ -95,9 +100,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
 
             {/* Content for active tab */}
             <div>
-                {activeTab === 'users' && <UserManagement />}
-                {activeTab === 'blog' && <BlogManagement />}
-                {activeTab === 'emails' && <EmailAutomations />}
+                {activeTab === 'users' && <UserManagement users={users} setUsers={setUsers} />}
+                {activeTab === 'blog' && <BlogManagement posts={posts} setPosts={setPosts} />}
+                {activeTab === 'emails' && <EmailAutomations templates={templates} setTemplates={setTemplates} />}
             </div>
 
         </div>
