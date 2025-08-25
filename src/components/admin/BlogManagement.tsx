@@ -1,9 +1,16 @@
 import { useState } from 'react';
-import { blogPosts } from '../../lib/mock-data';
+import { blogPosts as initialPosts } from '../../lib/mock-data';
 import { BlogPost } from '../../lib/types';
+import EditBlogPostModal from './EditBlogPostModal';
 
 const BlogManagement = () => {
-    const [posts] = useState<BlogPost[]>(blogPosts);
+    const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
+    const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+
+    const handleSavePost = (updatedPost: BlogPost) => {
+        setPosts(posts.map(post => post.id === updatedPost.id ? updatedPost : post));
+        setEditingPost(null);
+    };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -30,7 +37,7 @@ const BlogManagement = () => {
                         <td className="px-6 py-4">{post.author}</td>
                         <td className="px-6 py-4">{post.date}</td>
                         <td className="px-6 py-4 text-right space-x-4">
-                         <button className="font-medium text-brand-purple hover:text-brand-purple/80">
+                         <button onClick={() => setEditingPost(post)} className="font-medium text-brand-purple hover:text-brand-purple/80">
                             Edit
                         </button>
                          <button className="font-medium text-red-500 hover:text-red-500/80">
@@ -42,6 +49,7 @@ const BlogManagement = () => {
                 </tbody>
                 </table>
             </div>
+            {editingPost && <EditBlogPostModal post={editingPost} onSave={handleSavePost} onClose={() => setEditingPost(null)} />}
         </div>
     );
 };

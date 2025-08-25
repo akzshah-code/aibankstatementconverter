@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { users } from '../../lib/mock-data';
+import { users as initialUsers } from '../../lib/mock-data';
 import { User } from '../../lib/types';
-// A modal component would be created here in a real app
-// import EditUserModal from './EditUserModal';
+import EditUserModal from './EditUserModal';
 
 const UserManagement = () => {
-  const [allUsers] = useState<User[]>(users);
-  // const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  const handleSaveUser = (updatedUser: User) => {
+    setAllUsers(allUsers.map(user => user.id === updatedUser.id ? updatedUser : user));
+    setEditingUser(null); // Close modal on save
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -34,7 +38,7 @@ const UserManagement = () => {
                 <td className="px-6 py-4">{user.planRenews}</td>
                 <td className="px-6 py-4 text-right">
                   <button 
-                    // onClick={() => setEditingUser(user)}
+                    onClick={() => setEditingUser(user)}
                     className="font-medium text-brand-purple hover:text-brand-purple/80"
                   >
                     Edit
@@ -45,7 +49,7 @@ const UserManagement = () => {
           </tbody>
         </table>
       </div>
-      {/* {editingUser && <EditUserModal user={editingUser} onClose={() => setEditingUser(null)} />} */}
+      {editingUser && <EditUserModal user={editingUser} onSave={handleSaveUser} onClose={() => setEditingUser(null)} />}
     </div>
   );
 };

@@ -1,9 +1,16 @@
 import { useState } from 'react';
-import { emailTemplates } from '../../lib/mock-data';
+import { emailTemplates as initialTemplates } from '../../lib/mock-data';
 import { EmailTemplate } from '../../lib/types';
+import EditEmailModal from './EditEmailModal';
 
 const EmailAutomations = () => {
-    const [templates] = useState<EmailTemplate[]>(emailTemplates);
+    const [templates, setTemplates] = useState<EmailTemplate[]>(initialTemplates);
+    const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+
+    const handleSaveTemplate = (updatedTemplate: EmailTemplate) => {
+        setTemplates(templates.map(t => t.id === updatedTemplate.id ? updatedTemplate : t));
+        setEditingTemplate(null);
+    };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -37,7 +44,7 @@ const EmailAutomations = () => {
                             </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                         <button className="font-medium text-brand-purple hover:text-brand-purple/80">
+                         <button onClick={() => setEditingTemplate(template)} className="font-medium text-brand-purple hover:text-brand-purple/80">
                             Edit
                         </button>
                         </td>
@@ -46,6 +53,7 @@ const EmailAutomations = () => {
                 </tbody>
                 </table>
             </div>
+            {editingTemplate && <EditEmailModal template={editingTemplate} onSave={handleSaveTemplate} onClose={() => setEditingTemplate(null)} />}
         </div>
     );
 };
