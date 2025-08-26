@@ -44,7 +44,7 @@ const PricingCard = ({ plan }: { plan: Plan }) => (
 
       <a
         href={plan.isEnterprise ? '#contact' : '#register'}
-        className="w-full text-center bg-brand-purple text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+        className="w-full text-center bg-brand-blue text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
       >
         {plan.isEnterprise ? 'Contact Us' : 'Get Started'}
       </a>
@@ -74,14 +74,14 @@ const Pricing = () => {
                 <div className="inline-flex items-center border border-gray-300 rounded-full p-1">
                     <button
                         onClick={() => setPlanType('monthly')}
-                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'monthly' ? 'bg-brand-purple text-white shadow' : 'text-gray-600'}`}
+                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'monthly' ? 'bg-brand-blue text-white shadow' : 'text-gray-600'}`}
                         aria-pressed={planType === 'monthly'}
                     >
                         Monthly Plan
                     </button>
                     <button
                         onClick={() => setPlanType('annual')}
-                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'annual' ? 'bg-brand-purple text-white shadow' : 'text-gray-600'}`}
+                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'annual' ? 'bg-brand-blue text-white shadow' : 'text-gray-600'}`}
                         aria-pressed={planType === 'annual'}
                     >
                         Annual Plan
@@ -89,7 +89,7 @@ const Pricing = () => {
                 </div>
 
                 {planType === 'annual' && (
-                    <p className="mt-4 text-brand-purple font-semibold animate-pulse">Save up to 50% yearly!</p>
+                    <p className="mt-4 text-brand-blue font-semibold animate-pulse">Save up to 50% yearly!</p>
                 )}
 
                 <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">

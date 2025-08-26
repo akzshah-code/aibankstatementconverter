@@ -50,7 +50,7 @@ const EmailRouting = ({ routes, setRoutes }: EmailRoutingProps) => {
                                     </div>
                                 </td>
                                  <td className="px-6 py-4 text-right">
-                                    <button className="font-medium text-brand-purple hover:text-brand-purple/80">Edit</button>
+                                    <button className="font-medium text-brand-blue hover:text-brand-blue/80">Edit</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -71,14 +71,14 @@ const EmailRouting = ({ routes, setRoutes }: EmailRoutingProps) => {
                         <input 
                             type="search"
                             placeholder="Search"
-                            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple transition-colors"
+                            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
                         />
                     </div>
                     <div className="w-full md:w-auto flex flex-col md:flex-row gap-4">
-                        <select className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple">
+                        <select className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue">
                             <option>All domains</option>
                         </select>
-                         <select className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple">
+                         <select className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue">
                             <option>All actions</option>
                         </select>
                         <button className="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
@@ -118,7 +118,7 @@ const EmailRouting = ({ routes, setRoutes }: EmailRoutingProps) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="font-medium text-brand-purple hover:text-brand-purple/80">Edit</button>
+                                        <button className="font-medium text-brand-blue hover:text-brand-blue/80">Edit</button>
                                     </td>
                                 </tr>
                             ))}

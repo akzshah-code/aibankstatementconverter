@@ -33,14 +33,14 @@ const BlogPostPage = ({ posts, postId, user, onLogout }: BlogPostPageProps) => {
               <p>{post.content}</p>
             </div>
              <div className="mt-12 pt-8 border-t">
-                <a href="#blog" className="font-semibold text-brand-purple hover:underline">&larr; Back to Blog</a>
+                <a href="#blog" className="font-semibold text-brand-blue hover:underline">&larr; Back to Blog</a>
             </div>
           </article>
         ) : (
           <div className="text-center py-20">
             <h1 className="text-3xl font-bold text-brand-dark">Post Not Found</h1>
             <p className="text-brand-gray mt-4">Sorry, we couldn't find the post you were looking for.</p>
-            <a href="#blog" className="inline-block mt-8 bg-brand-purple text-white px-6 py-3 rounded-md font-semibold hover:bg-opacity-90">
+            <a href="#blog" className="inline-block mt-8 bg-brand-blue text-white px-6 py-3 rounded-md font-semibold hover:bg-opacity-90">
               Return to Blog
             </a>
           </div>

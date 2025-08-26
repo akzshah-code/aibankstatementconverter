@@ -36,27 +36,27 @@ const AddBlogPostModal = ({ onSave, onClose }: AddBlogPostModalProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <input type="text" name="title" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div>
             <label htmlFor="author" className="block text-sm font-medium text-gray-700">Author</label>
-            <input type="text" name="author" id="author" value={author} onChange={(e) => setAuthor(e.target.value)} required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <input type="text" name="author" id="author" value={author} onChange={(e) => setAuthor(e.target.value)} required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div>
             <label htmlFor="featuredImage" className="block text-sm font-medium text-gray-700">Featured Image</label>
-            <input type="file" name="featuredImage" id="featuredImage" accept="image/*" onChange={(e) => setFeaturedImage(e.target.files?.[0] || null)} className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-purple-light file:text-brand-purple hover:file:bg-brand-purple/20"/>
+            <input type="file" name="featuredImage" id="featuredImage" accept="image/*" onChange={(e) => setFeaturedImage(e.target.files?.[0] || null)} className="mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-blue-light file:text-brand-blue hover:file:bg-brand-blue/20"/>
           </div>
           <div>
             <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700">Excerpt</label>
-            <textarea name="excerpt" id="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} required placeholder="A short summary of the post..." className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <textarea name="excerpt" id="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={3} required placeholder="A short summary of the post..." className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
-            <textarea name="content" id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={8} required placeholder="The full content of the blog post..." className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <textarea name="content" id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={8} required placeholder="The full content of the blog post..." className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={onClose} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Create Post</button>
+            <button type="submit" className="bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Create Post</button>
           </div>
         </form>
       </div>

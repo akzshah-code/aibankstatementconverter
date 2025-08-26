@@ -39,19 +39,19 @@ const EditEmailModal = ({ template, onSave, onClose }: EditEmailModalProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Template Name</label>
-            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div>
             <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Subject</label>
-            <input type="text" name="subject" id="subject" value={formData.subject} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <input type="text" name="subject" id="subject" value={formData.subject} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div className="flex items-center">
-            <input type="checkbox" name="active" id="active" checked={formData.active} onChange={handleChange} className="h-4 w-4 text-brand-purple border-gray-300 rounded focus:ring-brand-purple"/>
+            <input type="checkbox" name="active" id="active" checked={formData.active} onChange={handleChange} className="h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"/>
             <label htmlFor="active" className="ml-2 block text-sm font-medium text-gray-700">Active</label>
           </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={onClose} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Save Changes</button>
+            <button type="submit" className="bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Save Changes</button>
           </div>
         </form>
       </div>

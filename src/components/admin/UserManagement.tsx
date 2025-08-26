@@ -42,7 +42,7 @@ const UserManagement = ({ users, setUsers }: UserManagementProps) => {
                 <td className="px-6 py-4 text-right">
                   <button 
                     onClick={() => setEditingUser(user)}
-                    className="font-medium text-brand-purple hover:text-brand-purple/80"
+                    className="font-medium text-brand-blue hover:text-brand-blue/80"
                   >
                     Edit
                   </button>

@@ -41,10 +41,13 @@ const Header = ({ user, onLogout }: HeaderProps) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <a href="/#" className="flex items-center space-x-2">
-              <img src="/logo.png" alt="BankConverts Logo" className="h-8 w-8" />
-              <span className="font-bold text-xl text-brand-dark">BankConverts</span>
+          <div className="flex-shrink-0">
+            <a href="/#" className="flex items-center">
+              <img src="/logo.png" alt="BankConverts Logo" className="h-8 w-auto" />
+              <div className="ml-3 flex flex-col justify-center">
+                 <span className="font-bold text-xl text-brand-dark leading-none">BankConverts</span>
+                 <span className="hidden md:block text-xs text-brand-gray leading-tight mt-0.5">Transform Statements. Unlock Data.</span>
+              </div>
             </a>
           </div>
 
@@ -56,7 +59,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
                 <a 
                   key={link.label} 
                   href={link.href} 
-                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-red-500 font-semibold' : 'text-gray-600 hover:text-brand-purple'}`}
+                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-red-500 font-semibold' : 'text-gray-600 hover:text-brand-blue'}`}
                 >
                   {link.label}
                 </a>
@@ -70,7 +73,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
                   Logout
                 </button>
               ) : (
-                <a href="#register" className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
+                <a href="#register" className="bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
                   Register
                 </a>
               )}
@@ -93,7 +96,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
-              <a key={link.label} href={link.href} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-purple hover:bg-gray-50">{link.label}</a>
+              <a key={link.label} href={link.href} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50">{link.label}</a>
             ))}
           </div>
         </div>

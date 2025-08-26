@@ -44,7 +44,7 @@ const EditUserModal = ({ user, onSave, onClose }: EditUserModalProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
-            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+            <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email (read-only)</label>
@@ -52,7 +52,7 @@ const EditUserModal = ({ user, onSave, onClose }: EditUserModalProps) => {
           </div>
            <div>
             <label htmlFor="plan" className="block text-sm font-medium text-gray-700">Subscription Plan</label>
-            <select name="plan" id="plan" value={formData.plan} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple">
+            <select name="plan" id="plan" value={formData.plan} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue">
                 <option>Free</option>
                 <option>Starter</option>
                 <option>Professional</option>
@@ -61,16 +61,16 @@ const EditUserModal = ({ user, onSave, onClose }: EditUserModalProps) => {
            <div className="grid grid-cols-2 gap-4">
                <div>
                     <label htmlFor="usageUsed" className="block text-sm font-medium text-gray-700">Usage Used</label>
-                    <input type="number" name="usageUsed" id="usageUsed" value={formData.usage.used} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+                    <input type="number" name="usageUsed" id="usageUsed" value={formData.usage.used} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
                 </div>
                 <div>
                     <label htmlFor="usageTotal" className="block text-sm font-medium text-gray-700">Usage Total</label>
-                    <input type="number" name="usageTotal" id="usageTotal" value={formData.usage.total} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple"/>
+                    <input type="number" name="usageTotal" id="usageTotal" value={formData.usage.total} onChange={handleChange} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue"/>
                 </div>
            </div>
           <div className="flex justify-end space-x-3 pt-4">
             <button type="button" onClick={onClose} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Save Changes</button>
+            <button type="submit" className="bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90">Save Changes</button>
           </div>
         </form>
       </div>

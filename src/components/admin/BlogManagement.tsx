@@ -40,7 +40,7 @@ const BlogManagement = ({ posts, setPosts }: BlogManagementProps) => {
                 <h2 className="text-2xl font-bold text-brand-dark">Manage Blog Posts</h2>
                 <button 
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+                    className="bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
                 >
                     New Post
                 </button>
@@ -62,7 +62,7 @@ const BlogManagement = ({ posts, setPosts }: BlogManagementProps) => {
                         <td className="px-6 py-4">{post.author}</td>
                         <td className="px-6 py-4">{post.date}</td>
                         <td className="px-6 py-4 text-right space-x-4">
-                         <button onClick={() => setEditingPost(post)} className="font-medium text-brand-purple hover:text-brand-purple/80">
+                         <button onClick={() => setEditingPost(post)} className="font-medium text-brand-blue hover:text-brand-blue/80">
                             Edit
                         </button>
                          <button onClick={() => handleDeletePost(post.id)} className="font-medium text-red-500 hover:text-red-500/80">

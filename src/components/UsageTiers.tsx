@@ -31,7 +31,7 @@ const TierCard = ({ title, description, features, price, actionText, actionLink 
       <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
         <p className="text-2xl font-bold text-brand-dark">{price}</p>
         {actionText && actionLink && (
-          <a href={actionLink} className="text-brand-purple font-semibold hover:underline">
+          <a href={actionLink} className="text-brand-blue font-semibold hover:underline">
             {actionText}
           </a>
         )}
@@ -63,11 +63,11 @@ const UsageTiers = () => {
             actionLink="#register"
           />
           {/* Subscribe Tier */}
-          <div className="border-2 border-brand-purple rounded-lg p-6 flex flex-col h-full shadow-lg bg-white">
+          <div className="border-2 border-brand-blue rounded-lg p-6 flex flex-col h-full shadow-lg bg-white">
             <h3 className="text-xl font-semibold text-brand-dark">Subscribe</h3>
             <p className="text-sm text-brand-gray mt-1 flex-grow">Subscribe to convert more documents</p>
             <div className="mt-auto pt-6 text-right">
-              <a href="#pricing" className="text-brand-purple font-semibold hover:underline">
+              <a href="#pricing" className="text-brand-blue font-semibold hover:underline">
                 Register
               </a>
             </div>

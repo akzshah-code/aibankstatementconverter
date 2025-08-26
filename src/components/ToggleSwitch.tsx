@@ -17,8 +17,8 @@ const ToggleSwitch = ({ checked, onChange, ariaLabel }: ToggleSwitchProps) => {
       aria-label={ariaLabel}
       onClick={handleToggle}
       className={`${
-        checked ? 'bg-green-500' : 'bg-gray-300'
-      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-purple focus:ring-offset-2`}
+        checked ? 'bg-brand-green' : 'bg-gray-300'
+      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2`}
     >
       <span
         aria-hidden="true"

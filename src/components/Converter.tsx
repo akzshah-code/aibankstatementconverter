@@ -114,8 +114,8 @@ const Converter = () => {
   };
 
   const dropzoneBaseClasses = "border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-300 flex flex-col items-center justify-center space-y-4 h-64";
-  const dropzoneIdleClasses = "border-gray-300 bg-gray-50 hover:border-brand-purple cursor-pointer";
-  const dropzoneDraggingClasses = "border-brand-purple bg-brand-purple-light";
+  const dropzoneIdleClasses = "border-gray-300 bg-gray-50 hover:border-brand-blue cursor-pointer";
+  const dropzoneDraggingClasses = "border-brand-blue bg-brand-blue-light";
   const dropzoneDisabledClasses = "border-gray-300 bg-gray-100 cursor-not-allowed";
 
   return (
@@ -126,7 +126,7 @@ const Converter = () => {
             <p className="text-sm">{error}</p>
             <button
               onClick={() => resetState()}
-              className="mt-3 bg-brand-purple text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 text-sm"
+              className="mt-3 bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 text-sm"
             >
               Try Again
             </button>
@@ -157,13 +157,13 @@ const Converter = () => {
           aria-label="File upload dropzone"
           aria-disabled={isLoading}
         >
-          <div className="bg-green-100 rounded-full p-4">
-            <svg className="h-10 w-10 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="bg-brand-blue-light rounded-full p-4">
+            <svg className="h-10 w-10 text-brand-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
             </svg>
           </div>
           <p className="text-lg font-semibold text-brand-dark">Drag & Drop Your Files Here</p>
-          <p className="text-sm text-brand-gray">or <span className="text-brand-purple font-medium">click to browse</span></p>
+          <p className="text-sm text-brand-gray">or <span className="text-brand-blue font-medium">click to browse</span></p>
           <p className="text-xs text-brand-gray pt-2">Supported formats: PDF, JPG, PNG (max 700KB)</p>
         </div>
       ) : null }
@@ -198,7 +198,7 @@ const Converter = () => {
         <button 
           onClick={handleConvert}
           disabled={!file || isLoading || !!result} 
-          className="w-full bg-brand-purple text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? (
             <>

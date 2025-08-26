@@ -34,7 +34,7 @@ const Login = ({ onLogin }: LoginProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
           />
         </div>
         <div>
@@ -50,13 +50,13 @@ const Login = ({ onLogin }: LoginProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
           />
         </div>
         <div>
           <button
             type="submit"
-            className="w-full bg-brand-purple text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+            className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
           >
             Login
           </button>
@@ -65,7 +65,7 @@ const Login = ({ onLogin }: LoginProps) => {
       <div className="text-center mt-6">
         <p className="text-sm text-brand-gray">
           Don't have an account?{' '}
-          <a href="#register" className="font-semibold text-brand-purple hover:underline">
+          <a href="#register" className="font-semibold text-brand-blue hover:underline">
             Register
           </a>
         </p>

@@ -14,7 +14,7 @@ const Hero = () => {
             </p>
             <a
               href="#demo"
-              className="inline-block bg-white text-brand-purple px-8 py-3 rounded-md font-semibold border border-brand-purple hover:bg-brand-purple-light transition-colors duration-200"
+              className="inline-block bg-white text-brand-blue px-8 py-3 rounded-md font-semibold border border-brand-blue hover:bg-brand-blue-light transition-colors duration-200"
             >
               Try Demo
             </a>
