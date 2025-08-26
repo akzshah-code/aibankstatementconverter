@@ -45,7 +45,9 @@ const Header = ({ user, onLogout }: HeaderProps) => {
             <a href="/#" className="flex items-center">
               <img src="/logo.png" alt="BankConverts Logo" className="h-8 w-auto" />
               <div className="ml-3 flex flex-col justify-center">
-                 <span className="font-bold text-xl text-brand-dark leading-none">BankConverts</span>
+                 <span className="font-bold text-xl leading-none">
+                    <span className="text-brand-blue">Bank</span><span className="text-brand-green">Converts</span>
+                 </span>
                  <span className="hidden md:block text-xs text-brand-gray leading-tight mt-0.5">Transform Statements. Unlock Data.</span>
               </div>
             </a>
@@ -59,7 +61,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
                 <a 
                   key={link.label} 
                   href={link.href} 
-                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-red-500 font-semibold' : 'text-gray-600 hover:text-brand-blue'}`}
+                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-brand-blue font-semibold' : 'text-gray-600 hover:text-brand-blue'}`}
                 >
                   {link.label}
                 </a>
