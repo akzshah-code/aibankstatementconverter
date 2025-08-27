@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { EmailTemplate } from '../../lib/types';
 import EditEmailModal from './EditEmailModal';
 import AddEmailModal from './AddEmailModal';

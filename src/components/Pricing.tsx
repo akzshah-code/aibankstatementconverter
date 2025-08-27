@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Plan {
   name: string;
@@ -24,7 +24,7 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
   ],
 };
 
-const PricingCard = ({ plan }: { plan: Plan }) => (
+const PricingCard: React.FC<{ plan: Plan }> = ({ plan }) => (
     <div className="border border-gray-200 rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-shadow duration-300">
       <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
       
@@ -71,30 +71,27 @@ const Pricing = () => {
     return (
         <section className="py-20 bg-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <div className="inline-flex items-center border border-gray-300 rounded-full p-1">
-                    <button
+                <div className="inline-flex items-center border border-gray-200 p-1 rounded-full bg-gray-50 mb-12">
+                    <button 
                         onClick={() => setPlanType('monthly')}
-                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'monthly' ? 'bg-brand-blue text-white shadow' : 'text-gray-600'}`}
-                        aria-pressed={planType === 'monthly'}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-brand-blue text-white' : 'text-gray-600'}`}
                     >
-                        Monthly Plan
+                        Monthly
                     </button>
-                    <button
+                    <button 
                         onClick={() => setPlanType('annual')}
-                        className={`px-8 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${planType === 'annual' ? 'bg-brand-blue text-white shadow' : 'text-gray-600'}`}
-                        aria-pressed={planType === 'annual'}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-brand-blue text-white' : 'text-gray-600'}`}
                     >
-                        Annual Plan
+                        Annual
+                        <span className="absolute -top-2 -right-4 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            Save 25%
+                        </span>
                     </button>
                 </div>
-
-                {planType === 'annual' && (
-                    <p className="mt-4 text-brand-blue font-semibold animate-pulse">Save up to 50% yearly!</p>
-                )}
-
-                <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-                    {currentPlans.map(plan => (
-                        <PricingCard key={`${planType}-${plan.name}`} plan={plan} />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {currentPlans.map((plan) => (
+                        <PricingCard key={plan.name} plan={plan} />
                     ))}
                 </div>
             </div>

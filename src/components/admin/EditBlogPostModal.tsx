@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { BlogPost } from '../../lib/types';
 
 interface EditBlogPostModalProps {
@@ -14,9 +14,9 @@ const EditBlogPostModal = ({ post, onSave, onClose }: EditBlogPostModalProps) =>
     setFormData(post);
   }, [post]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: BlogPost) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: FormEvent) => {

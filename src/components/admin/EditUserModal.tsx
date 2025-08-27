@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { User } from '../../lib/types';
 
 interface EditUserModalProps {
@@ -14,16 +14,16 @@ const EditUserModal = ({ user, onSave, onClose }: EditUserModalProps) => {
     setFormData(user);
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'usageUsed' || name === 'usageTotal') {
         const key = name === 'usageUsed' ? 'used' : 'total';
-        setFormData(prev => ({
+        setFormData((prev: User) => ({
             ...prev,
             usage: { ...prev.usage, [key]: parseInt(value, 10) || 0 }
         }));
     } else {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev: User) => ({ ...prev, [name]: value }));
     }
   };
 

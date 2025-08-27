@@ -1,0 +1,6 @@
+# wrangler.toml
+# This file provides the project name and runtime compatibility date.
+# We have removed the 'pages_build_output_dir' to resolve the conflict
+# with the 'dev' script in package.json for local development.
+name = "bank-converts-app"
+compatibility_date = "2024-03-20"

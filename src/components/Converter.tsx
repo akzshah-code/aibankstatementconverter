@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent } from 'react';
+import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 
 // Helper function to convert a File object to a base64 string
 const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> => {
@@ -38,7 +38,7 @@ const Converter = () => {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     handleFileSelect(selectedFile || null);
     if (event.target) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { EmailTemplate } from '../../lib/types';
 
 interface EditEmailModalProps {
@@ -14,9 +14,9 @@ const EditEmailModal = ({ template, onSave, onClose }: EditEmailModalProps) => {
     setFormData(template);
   }, [template]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
+    setFormData((prev: EmailTemplate) => ({ 
         ...prev, 
         [name]: type === 'checkbox' ? checked : value 
     }));

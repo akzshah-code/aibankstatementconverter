@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { EmailRoute } from '../../lib/types';
 import ToggleSwitch from '../ToggleSwitch';
 
