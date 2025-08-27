@@ -75,8 +75,21 @@ export const onRequestPost = async ({ request, env }) => {
       },
     });
     
-    // The response.text from a schema-enforced call is a JSON string.
-    const transactions = JSON.parse(response.text);
+    const responseText = response.text;
+    let transactions;
+
+    // Defensively parse the JSON response from the AI.
+    // This prevents crashes if the model returns a malformed or empty string.
+    try {
+      if (!responseText) {
+        throw new Error("AI model returned an empty response.");
+      }
+      transactions = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("Failed to parse Gemini JSON response. Raw text:", responseText);
+      throw new Error(`AI model returned invalid JSON. Details: ${parseError.message}`);
+    }
+
 
     return new Response(JSON.stringify({ transactions }), {
       status: 200,

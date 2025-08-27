@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import Converter from './Converter';
+import DemoView from './DemoView';
 
 const Hero = () => {
+  const [showDemo, setShowDemo] = useState(false);
+
   return (
     <section id="convert" className="py-20 md:py-28 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,14 +17,18 @@ const Hero = () => {
               Upload your PDF or scanned image and get a clean, ready-to-use Excel or CSV file instantly. No manual formatting needed.
             </p>
             <a
-              href="#demo"
+              href="#!"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowDemo(true);
+              }}
               className="inline-block bg-white text-brand-blue px-8 py-3 rounded-md font-semibold border border-brand-blue hover:bg-brand-blue-light transition-colors duration-200"
             >
               Try Demo
             </a>
           </div>
           <div>
-            <Converter />
+            {showDemo ? <DemoView onReset={() => setShowDemo(false)} /> : <Converter />}
           </div>
         </div>
       </div>
