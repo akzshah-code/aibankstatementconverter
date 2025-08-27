@@ -11,26 +11,27 @@ const responseSchema = {
     properties: {
       date: {
         type: Type.STRING,
-        description: "Transaction date in YYYY-MM-DD format.",
+        description: "Transaction date in 'Month Day, Year' format (e.g., 'Jul 1, 2024').",
       },
       description: {
         type: Type.STRING,
         description: "A brief description of the transaction.",
       },
-      debit: {
+      amount: {
         type: Type.NUMBER,
-        description: "The withdrawal or debit amount as a number. Use null if not applicable.",
+        description: "The transaction amount. Use positive values for credits/deposits and negative for debits/withdrawals.",
       },
-      credit: {
-        type: Type.NUMBER,
-        description: "The deposit or credit amount as a number. Use null if not applicable.",
+      currency: {
+        type: Type.STRING,
+        description: "The 3-letter currency code (e.g., USD, INR).",
       },
-      balance: {
-        type: Type.NUMBER,
-        description: "The remaining balance after the transaction as a number.",
+      type: {
+        type: Type.STRING,
+        description: "The transaction type, must be either 'Credit' or 'Debit'.",
       },
     },
-    required: ["date", "description", "balance"],
+    // Make all fields required to ensure data quality.
+    required: ["date", "description", "amount", "currency", "type"],
   },
 };
 
@@ -63,7 +64,15 @@ export const onRequestPost = async ({ request, env }) => {
     };
 
     const textPart = {
-      text: `You are an expert financial data extractor. Analyze this bank statement and extract all transactions into a structured JSON array. Each object in the array must match the provided schema. The values for 'debit', 'credit', and 'balance' should be numbers. If a value is not present for a given transaction (e.g., no debit), use null. Ensure the date is in 'YYYY-MM-DD' format.`,
+      text: `You are an expert financial data extractor. Analyze this bank statement image and extract all transactions into a structured JSON array. Each object in the array must strictly match the provided schema.
+
+      - 'date': Format as 'Month Day, Year' (e.g., 'Jul 1, 2024').
+      - 'description': Provide a clean, concise transaction description.
+      - 'amount': Must be a number. Use negative values for debits/withdrawals and positive values for credits/deposits.
+      - 'currency': The 3-letter currency code (e.g., USD, INR).
+      - 'type': Must be the string 'Credit' for deposits or 'Debit' for withdrawals.
+      
+      Do not include any transactions that are summaries or running totals. Only extract individual line-item transactions.`,
     };
 
     const response = await ai.models.generateContent({

@@ -29,8 +29,8 @@ This command will read the `package.json` file and install all the necessary lib
 
 The application requires your Google AI API key to function. We'll use a local environment file to manage this securely.
 
-a. **Create a `.dev.vars` file:**
-Make a copy of the example file `.dev.vars.example` and rename it to `.dev.vars`.
+a. **Create a local `.dev.vars` file:**
+In your project's root directory, create a copy of the example file `.dev.vars.example`. Rename the copy to `.dev.vars`.
 
 ```bash
 cp .dev.vars.example .dev.vars

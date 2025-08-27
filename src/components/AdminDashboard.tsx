@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { User, BlogPost, EmailTemplate, EmailRoute } from "../lib/types";
-import UserManagement from "./admin/UserManagement";
-import BlogManagement from "./admin/BlogManagement";
-import EmailAutomations from "./admin/EmailAutomations";
-import EmailRouting from "./admin/EmailRouting";
+
+// Lazy-load the components for each admin tab to split them into separate chunks.
+const UserManagement = lazy(() => import("./admin/UserManagement"));
+const BlogManagement = lazy(() => import("./admin/BlogManagement"));
+const EmailAutomations = lazy(() => import("./admin/EmailAutomations"));
+const EmailRouting = lazy(() => import("./admin/EmailRouting"));
+
 
 interface AdminDashboardProps {
     user: User | null;
@@ -17,7 +20,7 @@ interface AdminDashboardProps {
     setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
 }
 
-const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, value: string | number }) => (
+const StatCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string | number }) => (
     <div className="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
         <div className="bg-brand-blue-light p-3 rounded-full">
             {icon}
@@ -26,6 +29,12 @@ const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, va
             <p className="text-sm text-brand-gray">{title}</p>
             <p className="text-2xl font-bold text-brand-dark">{value}</p>
         </div>
+    </div>
+);
+
+const TabContentFallback = () => (
+    <div className="bg-white p-6 rounded-lg shadow-md text-center">
+        <p className="text-brand-gray">Loading section...</p>
     </div>
 );
 
@@ -104,10 +113,12 @@ const AdminDashboard = ({ user, users, posts, templates, routes, setUsers, setPo
 
             {/* Content for active tab */}
             <div>
-                {activeTab === 'users' && <UserManagement users={users} setUsers={setUsers} />}
-                {activeTab === 'blog' && <BlogManagement posts={posts} setPosts={setPosts} />}
-                {activeTab === 'emails' && <EmailAutomations templates={templates} setTemplates={setTemplates} />}
-                {activeTab === 'routing' && <EmailRouting routes={routes} setRoutes={setRoutes} />}
+                <Suspense fallback={<TabContentFallback />}>
+                    {activeTab === 'users' && <UserManagement users={users} setUsers={setUsers} />}
+                    {activeTab === 'blog' && <BlogManagement posts={posts} setPosts={setPosts} />}
+                    {activeTab === 'emails' && <EmailAutomations templates={templates} setTemplates={setTemplates} />}
+                    {activeTab === 'routing' && <EmailRouting routes={routes} setRoutes={setRoutes} />}
+                </Suspense>
             </div>
 
         </div>

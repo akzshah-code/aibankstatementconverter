@@ -1,14 +1,29 @@
-import { useState, useEffect } from 'react';
-import LandingPage from './pages/LandingPage';
-import PricingPage from './pages/PricingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import AdminPage from './pages/AdminPage';
-import BlogPage from './pages/BlogPage';
-import BlogPostPage from './pages/BlogPostPage';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { User, BlogPost, EmailTemplate, EmailRoute } from './lib/types';
 import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
+
+// --- Lazy-loaded Page Components ---
+// By using React.lazy, we ensure that the code for each page is only downloaded
+// when the user navigates to it. This is a key optimization for performance.
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+
+
+// A simple, centered loading indicator to show while pages are being loaded.
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="text-center">
+      <p className="text-lg font-semibold text-brand-dark">Loading...</p>
+      <p className="text-sm text-brand-gray">Please wait a moment.</p>
+    </div>
+  </div>
+);
 
 function App() {
   const [route, setRoute] = useState(window.location.hash);
@@ -134,7 +149,11 @@ function App() {
     }
   };
 
-  return renderPage();
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      {renderPage()}
+    </Suspense>
+  );
 }
 
 export default App;

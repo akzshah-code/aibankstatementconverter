@@ -1,10 +1,11 @@
+import React from 'react';
 import { User } from "../lib/types";
 
 interface DashboardProps {
     user: User | null;
 }
 
-const StatCard = ({ icon, title, value }: { icon: JSX.Element, title: string, value: string }) => (
+const StatCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string }) => (
     <div className="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
         <div className="bg-brand-blue-light p-3 rounded-full">
             {icon}

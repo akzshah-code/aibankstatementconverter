@@ -1,4 +1,6 @@
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { ExtractedTransaction } from '../lib/types';
+import ResultsView from './ResultsView';
 
 // Helper function to convert a File object to a base64 string
 const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> => {
@@ -21,7 +23,7 @@ const Converter = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any | null>(null); // In a real app, define a type for the result
+  const [result, setResult] = useState<ExtractedTransaction[] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetState = () => {
@@ -94,16 +96,21 @@ const Converter = () => {
         },
         body: JSON.stringify({ image: base64Data, mimeType: mimeType }),
       });
+      
+      const contentType = response.headers.get('content-type');
+
+      // Check if the response is JSON before attempting to parse it.
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error("The server returned an unexpected response. This can happen due to a server error or an invalid API key. Please check your configuration.");
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `API request failed with status ${response.status}`);
+        throw new Error(errorData.error || errorData.details || `API request failed with status ${response.status}`);
       }
       
       const responseData = await response.json();
       setResult(responseData.transactions);
-      // For now, we just log the result. In the next step, we'll add a download button.
-      console.log('Conversion successful:', responseData.transactions);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -118,6 +125,16 @@ const Converter = () => {
   const dropzoneDraggingClasses = "border-brand-blue bg-brand-blue-light";
   const dropzoneDisabledClasses = "border-gray-300 bg-gray-100 cursor-not-allowed";
 
+  // If we have a result, show the ResultsView component
+  if (result) {
+    return (
+      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
+        <ResultsView transactions={result} onReset={resetState} />
+      </div>
+    );
+  }
+
+  // Otherwise, show the uploader UI
   return (
     <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
       {error && (
@@ -171,7 +188,7 @@ const Converter = () => {
       {file && !error ? (
         <div className="text-center h-64 flex flex-col justify-center">
             <h3 className="text-lg font-medium text-brand-dark mb-4">
-              {result ? 'Conversion Successful!' : 'File Ready for Conversion'}
+              File Ready for Conversion
             </h3>
             <div className="p-3 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-between">
               <div className="flex items-center space-x-3 truncate min-w-0">
@@ -186,18 +203,14 @@ const Converter = () => {
                 </svg>
               </button>
             </div>
-            {result ? (
-               <p className="text-xs text-brand-gray pt-2 mt-2">{result.length} transactions found. Ready to download.</p>
-            ) : (
-               <p className="text-xs text-brand-gray pt-2 mt-2">Ready to convert. Click the button below.</p>
-            )}
+            <p className="text-xs text-brand-gray pt-2 mt-2">Ready to convert. Click the button below.</p>
         </div>
       ) : null}
       
       <div className="mt-6">
         <button 
           onClick={handleConvert}
-          disabled={!file || isLoading || !!result} 
+          disabled={!file || isLoading} 
           className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? (

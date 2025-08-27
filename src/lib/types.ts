@@ -36,3 +36,11 @@ export interface EmailRoute {
   destination: string;
   active: boolean;
 }
+
+export interface ExtractedTransaction {
+  date: string;
+  description: string;
+  amount: number;
+  currency: string;
+  type: 'Credit' | 'Debit';
+}
