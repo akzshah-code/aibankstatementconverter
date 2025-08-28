@@ -22,17 +22,23 @@ const UnlockPdf = ({ file, onUnlock, onCancel }: UnlockPdfProps) => {
 
     try {
       const fileBuffer = await file.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(fileBuffer, { userPassword: password } as any);
+      // FIX: The project's version of pdf-lib seems to have outdated TypeScript definitions
+      // that don't include the 'password' option. Casting to 'any' bypasses the incorrect
+      // compile-time error, allowing the valid runtime option to be used.
+      const pdfDoc = await PDFDocument.load(fileBuffer, { password: password } as any);
       const pdfBytes = await pdfDoc.save();
 
-      // ✅ FIX: Use pdfBytes.buffer to ensure compatibility with BlobPart
       const unlockedFile = new File([pdfBytes as BlobPart], file.name, { type: 'application/pdf' });
-
-
 
       onUnlock(unlockedFile);
     } catch (err) {
-      setError('Incorrect password. Please try again.');
+      if (err instanceof Error && err.message.toLowerCase().includes('password')) {
+        setError('Incorrect password. Please try again.');
+      } else {
+        // Provide an actionable solution for unrecoverable errors.
+        setError("Unsupported PDF Format: This PDF is corrupted or uses an unsupported format/encryption. Solution: Please open this file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
+        console.error("PDF Unlock Error:", err);
+      }
     } finally {
       setIsUnlocking(false);
     }
@@ -80,7 +86,7 @@ const UnlockPdf = ({ file, onUnlock, onCancel }: UnlockPdfProps) => {
               )}
             </button>
           </div>
-          {error && <p id="password-error" className="text-red-600 text-sm mt-1 text-left">{error}</p>}
+          {error && <p id="password-error" className="text-red-600 text-sm mt-1 text-left" dangerouslySetInnerHTML={{ __html: error.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>') }}></p>}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

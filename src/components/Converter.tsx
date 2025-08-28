@@ -21,6 +21,7 @@ const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> =
 };
 
 const loadingMessages = [
+  "Reading document image (OCR)...",
   "Analyzing document structure...",
   "Identifying transaction tables...",
   "Extracting individual line items...",
@@ -84,10 +85,12 @@ const Converter = () => {
       setFile(selectedFile);
     } catch (err) {
       // If loading fails, check if it's due to encryption.
-      if (err instanceof Error && err.message.includes('encrypted')) {
+      if (err instanceof Error && err.message.toLowerCase().includes('password')) {
         setLockedPdf(selectedFile); // It's a locked PDF, trigger the unlock UI.
       } else {
-        setError("This appears to be an invalid or corrupted PDF file. Please try another one.");
+        // This is a critical failure. The PDF is unparseable due to corruption or strong, non-password encryption.
+        // Provide an actionable solution instead of a dead-end error.
+        setError("Unsupported PDF Format: This PDF is corrupted or uses an unsupported format/encryption. Solution: Please open this file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
       }
     } finally {
       setIsCheckingPdf(false);
@@ -216,7 +219,7 @@ const Converter = () => {
       {error && (
         <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
             <p className="font-bold">Action Required</p>
-            <p className="text-sm">{error}</p>
+            <p className="text-sm" dangerouslySetInnerHTML={{ __html: error.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>') }}></p>
             <button
               onClick={() => resetState()}
               className="mt-3 bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 text-sm"
