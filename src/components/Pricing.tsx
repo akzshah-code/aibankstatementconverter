@@ -17,9 +17,9 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
     { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
   annual: [
-    { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4800 pages / month'] },
-    { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['12000 pages / month'] },
-    { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['48000 pages / month'] },
+    { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4800 pages / year'] },
+    { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['12000 pages / year'] },
+    { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['48000 pages / year'] },
     { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
 };

@@ -99,9 +99,12 @@ const Converter = () => {
       
       const contentType = response.headers.get('content-type');
 
-      // Check if the response is JSON before attempting to parse it.
+      // If the response is not JSON, it's likely a platform error (e.g., Cloudflare block page).
+      // We read the response as text to provide a more informative error.
       if (!contentType || !contentType.includes('application/json')) {
-        throw new Error("The server returned an unexpected response. This can happen due to a server error or an invalid API key. Please check your configuration.");
+        const errorText = await response.text();
+        console.error("Non-JSON response received from server:", errorText);
+        throw new Error(`The server returned an unexpected response (Status: ${response.status}). This could be due to a network issue or a security block.`);
       }
 
       if (!response.ok) {
