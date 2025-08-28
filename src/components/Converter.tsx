@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { useState, useRef, DragEvent, ChangeEvent, useEffect } from 'react';
 import { ExtractedTransaction } from '../lib/types';
 import ResultsView from './ResultsView';
 import UnlockPdf from './UnlockPdf';
@@ -20,6 +20,15 @@ const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> =
   });
 };
 
+const loadingMessages = [
+  "Analyzing document structure...",
+  "Identifying transaction tables...",
+  "Extracting individual line items...",
+  "This can take a minute for large files...",
+  "Formatting data for Excel...",
+  "Almost there, finalizing the results...",
+];
+
 
 const Converter = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -30,6 +39,21 @@ const Converter = () => {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractedTransaction[] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+
+  // Effect to cycle through loading messages for better UX during long waits
+  useEffect(() => {
+    let intervalId: number | undefined;
+    if (isLoading) {
+      let messageIndex = 0;
+      setLoadingMessage(loadingMessages[0]); // Start with the first message
+      intervalId = setInterval(() => {
+        messageIndex = (messageIndex + 1) % loadingMessages.length;
+        setLoadingMessage(loadingMessages[messageIndex]);
+      }, 3500); // Change every 3.5 seconds
+    }
+    return () => clearInterval(intervalId);
+  }, [isLoading]);
 
   const resetState = () => {
     setFile(null);
@@ -249,23 +273,36 @@ const Converter = () => {
       
       {file && !error ? (
         <div className="text-center h-64 flex flex-col justify-center">
-            <h3 className="text-lg font-medium text-brand-dark mb-4">
-              File Ready for Conversion
-            </h3>
-            <div className="p-3 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-between">
-              <div className="flex items-center space-x-3 truncate min-w-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-sm font-medium text-gray-700 truncate" title={file.name}>{file.name}</p>
-              </div>
-              <button onClick={resetState} aria-label="Remove file" className="ml-4 text-gray-500 hover:text-red-600 transition-colors flex-shrink-0" disabled={isLoading}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </button>
+          {isLoading ? (
+            <div className="space-y-4 px-4">
+              <p className="text-lg font-semibold text-brand-dark animate-pulse">
+                {loadingMessage}
+              </p>
+              <p className="text-sm text-brand-gray">
+                This can take up to 2 minutes for complex documents. Please keep this window open.
+              </p>
             </div>
-            <p className="text-xs text-brand-gray pt-2 mt-2">Ready to convert. Click the button below.</p>
+          ) : (
+            <>
+              <h3 className="text-lg font-medium text-brand-dark mb-4">
+                File Ready for Conversion
+              </h3>
+              <div className="p-3 border border-gray-200 rounded-md bg-gray-50 flex items-center justify-between">
+                <div className="flex items-center space-x-3 truncate min-w-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-sm font-medium text-gray-700 truncate" title={file.name}>{file.name}</p>
+                </div>
+                <button onClick={resetState} aria-label="Remove file" className="ml-4 text-gray-500 hover:text-red-600 transition-colors flex-shrink-0" disabled={isLoading}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xs text-brand-gray pt-2 mt-2">Ready to convert. Click the button below.</p>
+            </>
+          )}
         </div>
       ) : null}
       
