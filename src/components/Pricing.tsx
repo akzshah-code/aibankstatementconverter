@@ -17,9 +17,9 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
     { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
   annual: [
-    { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['400 pages / month'] },
-    { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['1000 pages / month'] },
-    { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4000 pages / month'] },
+    { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4800 pages / month'] },
+    { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['12000 pages / month'] },
+    { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['48000 pages / month'] },
     { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
 };
@@ -84,7 +84,7 @@ const Pricing = () => {
                     >
                         Annual
                         <span className="absolute -top-2 -right-4 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                            Save 25%
+                            Save 50%
                         </span>
                     </button>
                 </div>
