@@ -1,6 +1,9 @@
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { ExtractedTransaction } from '../lib/types';
 import ResultsView from './ResultsView';
+import UnlockPdf from './UnlockPdf';
+import { PDFDocument } from 'pdf-lib';
+
 
 // Helper function to convert a File object to a base64 string
 const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> => {
@@ -20,6 +23,8 @@ const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> =
 
 const Converter = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [lockedPdf, setLockedPdf] = useState<File | null>(null);
+  const [isCheckingPdf, setIsCheckingPdf] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,21 +33,47 @@ const Converter = () => {
 
   const resetState = () => {
     setFile(null);
+    setLockedPdf(null);
     setError(null);
     setIsLoading(false);
+    setIsCheckingPdf(false);
     setResult(null);
   };
 
-  const handleFileSelect = (selectedFile: File | null) => {
-    if (selectedFile) {
-      resetState();
+  const processSelectedFile = async (selectedFile: File | null) => {
+    if (!selectedFile) return;
+
+    resetState();
+
+    // If the file is not a PDF, we can skip the check.
+    if (selectedFile.type !== 'application/pdf') {
       setFile(selectedFile);
+      return;
+    }
+    
+    setIsCheckingPdf(true);
+    try {
+      const fileBuffer = await selectedFile.arrayBuffer();
+      // Try to load the PDF without a password.
+      await PDFDocument.load(fileBuffer);
+      // If it succeeds, the file is not encrypted.
+      setFile(selectedFile);
+    } catch (err) {
+      // If loading fails, check if it's due to encryption.
+      if (err instanceof Error && err.message.includes('encrypted')) {
+        setLockedPdf(selectedFile); // It's a locked PDF, trigger the unlock UI.
+      } else {
+        setError("This appears to be an invalid or corrupted PDF file. Please try another one.");
+      }
+    } finally {
+      setIsCheckingPdf(false);
     }
   };
 
+
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
-    handleFileSelect(selectedFile || null);
+    processSelectedFile(selectedFile || null);
     if (event.target) {
         event.target.value = '';
     }
@@ -72,11 +103,16 @@ const Converter = () => {
     if (isLoading) return;
     setIsDragging(false);
     const droppedFile = event.dataTransfer.files?.[0];
-    handleFileSelect(droppedFile || null);
+    processSelectedFile(droppedFile || null);
   };
 
   const openFileDialog = () => {
     if (!isLoading) fileInputRef.current?.click();
+  };
+  
+  const handleUnlockSuccess = (unlockedFile: File) => {
+    setLockedPdf(null);
+    setFile(unlockedFile);
   };
 
   const handleConvert = async () => {
@@ -137,6 +173,19 @@ const Converter = () => {
     );
   }
 
+  // Handle PDF unlocking UI
+  if (lockedPdf) {
+    return (
+      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
+          <UnlockPdf 
+            file={lockedPdf} 
+            onUnlock={handleUnlockSuccess} 
+            onCancel={resetState} 
+          />
+      </div>
+    );
+  }
+
   // Otherwise, show the uploader UI
   return (
     <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
@@ -160,10 +209,10 @@ const Converter = () => {
         className="hidden"
         accept=".pdf,.jpg,.jpeg,.png"
         aria-hidden="true"
-        disabled={isLoading}
+        disabled={isLoading || isCheckingPdf}
       />
 
-      {!file && !error ? (
+      {!file && !error && !isCheckingPdf ? (
         <div 
           onClick={openFileDialog}
           onDragEnter={handleDragEnter}
@@ -187,6 +236,16 @@ const Converter = () => {
           <p className="text-xs text-brand-gray pt-2">Supported formats: PDF, JPG, PNG (max 700KB)</p>
         </div>
       ) : null }
+
+      {isCheckingPdf ? (
+        <div className="text-center h-64 flex flex-col justify-center items-center">
+          <svg className="animate-spin h-8 w-8 text-brand-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="mt-4 text-brand-gray">Analyzing PDF...</p>
+        </div>
+      ) : null}
       
       {file && !error ? (
         <div className="text-center h-64 flex flex-col justify-center">
@@ -213,7 +272,7 @@ const Converter = () => {
       <div className="mt-6">
         <button 
           onClick={handleConvert}
-          disabled={!file || isLoading} 
+          disabled={!file || isLoading || isCheckingPdf} 
           className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? (
