@@ -45,7 +45,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = 
 
       <button
         onClick={() => onCtaClick(plan)}
-        className="w-full text-center bg-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-primary-hover transition-colors duration-200"
+        className="w-full text-center bg-brand-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200"
       >
         {plan.isEnterprise ? 'Contact Us' : 'Get Started'}
       </button>
@@ -104,7 +104,7 @@ const Pricing = ({ user }: { user: User | null }) => {
                 email: user.email,
             },
             theme: {
-                color: '#4F46E5', // Primary brand color
+                color: '#4F46E5', // Corresponds to brand.primary
             },
             modal: {
                 ondismiss: function () {
@@ -129,13 +129,13 @@ const Pricing = ({ user }: { user: User | null }) => {
                 <div className="inline-flex items-center border border-gray-200 p-1 rounded-full bg-brand-blue-light mb-12">
                     <button 
                         onClick={() => setPlanType('monthly')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-primary text-white' : 'text-brand-dark'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-brand-primary text-white' : 'text-brand-dark'}`}
                     >
                         Monthly
                     </button>
                     <button 
                         onClick={() => setPlanType('annual')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-primary text-white' : 'text-brand-dark'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-brand-primary text-white' : 'text-brand-dark'}`}
                     >
                         Annual
                         <span className="absolute -top-2 -right-4 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">

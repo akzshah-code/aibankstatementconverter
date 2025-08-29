@@ -13,7 +13,7 @@ const CallToAction = () => {
             <div>
               <a
                 href="#contact"
-                className="inline-block bg-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-primary-hover transition-colors duration-200 whitespace-nowrap"
+                className="inline-block bg-brand-primary text-white px-8 py-3 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200 whitespace-nowrap"
               >
                 Contact Us
               </a>

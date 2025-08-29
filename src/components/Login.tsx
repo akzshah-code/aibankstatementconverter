@@ -34,7 +34,7 @@ const Login = ({ onLogin }: LoginProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-primary focus:border-brand-primary transition-colors"
           />
         </div>
         <div>
@@ -50,13 +50,13 @@ const Login = ({ onLogin }: LoginProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-primary focus:border-brand-primary transition-colors"
           />
         </div>
         <div>
           <button
             type="submit"
-            className="w-full bg-primary text-white px-4 py-3 rounded-md font-semibold hover:bg-primary-hover transition-colors duration-200"
+            className="w-full bg-brand-primary text-white px-4 py-3 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200"
           >
             Login
           </button>
@@ -65,7 +65,7 @@ const Login = ({ onLogin }: LoginProps) => {
       <div className="text-center mt-6">
         <p className="text-sm text-brand-gray">
           Don't have an account?{' '}
-          <a href="#register" className="font-semibold text-primary hover:text-primary-hover transition-colors">
+          <a href="#register" className="font-semibold text-brand-primary hover:text-brand-primary-hover transition-colors">
             Register
           </a>
         </p>
