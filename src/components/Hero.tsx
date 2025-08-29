@@ -28,7 +28,7 @@ const Hero = () => {
             </a>
           </div>
           <div>
-            {showDemo ? <DemoView onReset={() => setShowDemo(false)} /> : <Converter />}
+            {showDemo ? <DemoView onExitDemo={() => setShowDemo(false)} /> : <Converter />}
           </div>
         </div>
       </div>

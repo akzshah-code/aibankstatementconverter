@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -5,17 +7,34 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        'brand-blue': '#2563EB',
-        'brand-blue-light': '#EFF6FF',
-        'brand-green': '#10B981',
-        'brand-dark': '#111827',
-        'brand-gray': '#6B7280',
+    // In Tailwind CSS v4 alpha, the `extend` key is removed.
+    // We spread the default theme and add our custom configurations directly.
+    colors: {
+      ...defaultTheme.colors,
+      // Existing brand colors to prevent breaking the UI
+      'brand-blue': '#2563EB',
+      'brand-blue-light': '#EFF6FF',
+      'brand-green': '#10B981',
+      'brand-dark': '#111827',
+      'brand-gray': '#6B7280',
+      // New colors from user's request
+      'primary': '#4F46E5', // indigo-600
+      'primary-hover': '#4338CA', // indigo-700
+      'secondary': '#6c757d',
+    },
+    fontFamily: {
+      ...defaultTheme.fontFamily,
+      sans: ['Roboto', ...defaultTheme.fontFamily.sans], // Changed from Inter to Roboto
+    },
+    // New animations from user's request
+    keyframes: {
+      'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(-10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
       },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      }
+    },
+    animation: {
+      'fade-in': 'fade-in 0.5s ease-out forwards',
     },
   },
   plugins: [],

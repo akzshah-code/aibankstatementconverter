@@ -3,3 +3,10 @@
 // Using a direct import statement achieves the same goal of including Vite's client-side
 // type definitions for features like `import.meta.env` and static asset imports.
 import 'vite/client';
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}

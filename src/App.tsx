@@ -13,6 +13,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const FaqPage = lazy(() => import('./pages/FaqPage'));
 
 
 // A simple, centered loading indicator to show while pages are being loaded.
@@ -121,6 +122,8 @@ function App() {
     switch (route) {
       case '#pricing':
         return <PricingPage user={user} onLogout={handleLogout} />;
+      case '#faq':
+        return <FaqPage user={user} onLogout={handleLogout} />;
       case '#login':
         return <LoginPage onLogin={handleLogin} />;
       case '#register':

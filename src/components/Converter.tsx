@@ -1,8 +1,11 @@
-import { useState, useRef, DragEvent, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { ExtractedTransaction } from '../lib/types';
 import ResultsView from './ResultsView';
 import UnlockPdf from './UnlockPdf';
-import { PDFDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure the worker for pdfjs-dist from the CDN. This is crucial for performance.
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.54/build/pdf.worker.mjs`;
 
 
 // Helper function to convert a File object to a base64 string
@@ -20,17 +23,6 @@ const fileToBase64 = (file: File): Promise<{ mimeType: string; data: string }> =
   });
 };
 
-const loadingMessages = [
-  "Reading document image (OCR)...",
-  "Analyzing document structure...",
-  "Identifying transaction tables...",
-  "Extracting individual line items...",
-  "This can take a minute for large files...",
-  "Formatting data for Excel...",
-  "Almost there, finalizing the results...",
-];
-
-
 const Converter = () => {
   const [file, setFile] = useState<File | null>(null);
   const [lockedPdf, setLockedPdf] = useState<File | null>(null);
@@ -40,21 +32,7 @@ const Converter = () => {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractedTransaction[] | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
-
-  // Effect to cycle through loading messages for better UX during long waits
-  useEffect(() => {
-    let intervalId: number | undefined;
-    if (isLoading) {
-      let messageIndex = 0;
-      setLoadingMessage(loadingMessages[0]); // Start with the first message
-      intervalId = setInterval(() => {
-        messageIndex = (messageIndex + 1) % loadingMessages.length;
-        setLoadingMessage(loadingMessages[messageIndex]);
-      }, 3500); // Change every 3.5 seconds
-    }
-    return () => clearInterval(intervalId);
-  }, [isLoading]);
+  const [progress, setProgress] = useState<{ processed: number; total: number }>({ processed: 0, total: 0 });
 
   const resetState = () => {
     setFile(null);
@@ -63,6 +41,7 @@ const Converter = () => {
     setIsLoading(false);
     setIsCheckingPdf(false);
     setResult(null);
+    setProgress({ processed: 0, total: 0 });
   };
 
   const processSelectedFile = async (selectedFile: File | null) => {
@@ -70,7 +49,6 @@ const Converter = () => {
 
     resetState();
 
-    // If the file is not a PDF, we can skip the check.
     if (selectedFile.type !== 'application/pdf') {
       setFile(selectedFile);
       return;
@@ -78,18 +56,20 @@ const Converter = () => {
     
     setIsCheckingPdf(true);
     try {
-      const fileBuffer = await selectedFile.arrayBuffer();
-      // Try to load the PDF without a password.
-      await PDFDocument.load(fileBuffer);
-      // If it succeeds, the file is not encrypted.
-      setFile(selectedFile);
+        const fileBuffer = await selectedFile.arrayBuffer();
+        // Use pdfjs-dist to check for encryption, which is more robust.
+        await pdfjsLib.getDocument({ data: fileBuffer, password: '' }).promise.catch(err => {
+            if (err.name === 'PasswordException') {
+                throw err; // Re-throw to be caught by the password handler
+            }
+            // For other errors, throw a generic parsing error.
+            throw new Error("Could not parse the PDF document.");
+        });
+        setFile(selectedFile);
     } catch (err) {
-      // If loading fails, check if it's due to encryption.
-      if (err instanceof Error && err.message.toLowerCase().includes('password')) {
-        setLockedPdf(selectedFile); // It's a locked PDF, trigger the unlock UI.
+      if (err instanceof Error && (err.name === 'PasswordException' || err.message.toLowerCase().includes('password'))) {
+        setLockedPdf(selectedFile);
       } else {
-        // This is a critical failure. The PDF is unparseable due to corruption or strong, non-password encryption.
-        // Provide an actionable solution instead of a dead-end error.
         setError("Unsupported PDF Format: This PDF is corrupted or uses an unsupported format/encryption. Solution: Please open this file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
       }
     } finally {
@@ -142,41 +122,83 @@ const Converter = () => {
     setFile(unlockedFile);
   };
 
+  const callApiForPageImage = async (base64Data: string): Promise<ExtractedTransaction[]> => {
+    const response = await fetch('/api/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64Data, mimeType: 'image/png' }),
+    });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const errorText = await response.text();
+      console.error("Non-JSON response from server:", errorText);
+      throw new Error(`Server returned an unexpected response (Status: ${response.status}).`);
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || errorData.details || `API request failed with status ${response.status}`);
+    }
+
+    const responseData = await response.json();
+    return responseData.transactions || [];
+  };
+
   const handleConvert = async () => {
     if (!file) return;
 
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setProgress({ processed: 0, total: 0 });
 
     try {
-      const { mimeType, data: base64Data } = await fileToBase64(file);
+      let allTransactions: ExtractedTransaction[] = [];
 
-      const response = await fetch('/api/proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: base64Data, mimeType: mimeType }),
-      });
-      
-      const contentType = response.headers.get('content-type');
+      if (file.type === 'application/pdf') {
+        const fileBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+        const pageCount = pdfDoc.numPages;
+        
+        setProgress({ processed: 0, total: pageCount });
 
-      // If the response is not JSON, it's likely a platform error (e.g., Cloudflare block page).
-      // We read the response as text to provide a more informative error.
-      if (!contentType || !contentType.includes('application/json')) {
-        const errorText = await response.text();
-        console.error("Non-JSON response received from server:", errorText);
-        throw new Error(`The server returned an unexpected response (Status: ${response.status}). This could be due to a network issue or a security block.`);
+        const pagePromises = [];
+        for (let i = 1; i <= pageCount; i++) {
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: 1.5 }); // Higher scale for better OCR quality
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            if (context) {
+                // FIX: The project's TypeScript definitions for `pdfjs-dist` appear to be incorrect,
+                // requiring a `canvas` property that is not part of the standard API. Adding it here
+                // to satisfy the compiler. The library uses `canvasContext` at runtime.
+                await page.render({ canvas, canvasContext: context, viewport }).promise;
+                const dataUrl = canvas.toDataURL('image/png');
+                const base64Data = dataUrl.split(',')[1];
+                
+                const promise = callApiForPageImage(base64Data).then(transactions => {
+                    setProgress(prev => ({ ...prev, processed: prev.processed + 1 }));
+                    return transactions;
+                });
+                pagePromises.push(promise);
+            }
+        }
+
+        const resultsByPage = await Promise.all(pagePromises);
+        allTransactions = resultsByPage.flat();
+
+      } else { // Handle images
+        setProgress({ processed: 0, total: 1 });
+        const { data: base64Data } = await fileToBase64(file);
+        allTransactions = await callApiForPageImage(base64Data);
+        setProgress({ processed: 1, total: 1 });
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || errorData.details || `API request failed with status ${response.status}`);
-      }
-      
-      const responseData = await response.json();
-      setResult(responseData.transactions);
+      setResult(allTransactions);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -191,7 +213,6 @@ const Converter = () => {
   const dropzoneDraggingClasses = "border-brand-blue bg-brand-blue-light";
   const dropzoneDisabledClasses = "border-gray-300 bg-gray-100 cursor-not-allowed";
 
-  // If we have a result, show the ResultsView component
   if (result) {
     return (
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
@@ -200,7 +221,6 @@ const Converter = () => {
     );
   }
 
-  // Handle PDF unlocking UI
   if (lockedPdf) {
     return (
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
@@ -213,7 +233,6 @@ const Converter = () => {
     );
   }
 
-  // Otherwise, show the uploader UI
   return (
     <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
       {error && (
@@ -260,7 +279,7 @@ const Converter = () => {
           </div>
           <p className="text-lg font-semibold text-brand-dark">Drag & Drop Your Files Here</p>
           <p className="text-sm text-brand-gray">or <span className="text-brand-blue font-medium">click to browse</span></p>
-          <p className="text-xs text-brand-gray pt-2">Supported formats: PDF, JPG, PNG (max 700KB)</p>
+          <p className="text-xs text-brand-gray pt-2">Supported formats: PDF, JPG, PNG</p>
         </div>
       ) : null }
 
@@ -278,11 +297,14 @@ const Converter = () => {
         <div className="text-center h-64 flex flex-col justify-center">
           {isLoading ? (
             <div className="space-y-4 px-4">
-              <p className="text-lg font-semibold text-brand-dark animate-pulse">
-                {loadingMessage}
+              <p className="text-lg font-semibold text-brand-dark">
+                {progress.total > 1 ? `Processing Page ${progress.processed} of ${progress.total}...` : 'Processing document...'}
               </p>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-brand-blue h-2.5 rounded-full" style={{ width: `${progress.total > 0 ? (progress.processed / progress.total) * 100 : 0}%` }}></div>
+              </div>
               <p className="text-sm text-brand-gray">
-                This can take up to 2 minutes for complex documents. Please keep this window open.
+                This can take a moment for complex documents. Please keep this window open.
               </p>
             </div>
           ) : (

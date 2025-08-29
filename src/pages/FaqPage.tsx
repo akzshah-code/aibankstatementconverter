@@ -1,23 +1,23 @@
 import Header from '../components/Header';
-import Pricing from '../components/Pricing';
 import Footer from '../components/Footer';
+import FAQ from '../components/FAQ';
 import { User } from '../lib/types';
 
-interface PricingPageProps {
+interface FaqPageProps {
   user: User | null;
   onLogout: () => void;
 }
 
-const PricingPage = ({ user, onLogout }: PricingPageProps) => {
+const FaqPage = ({ user, onLogout }: FaqPageProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
       <main className="flex-grow">
-        <Pricing user={user} />
+        <FAQ />
       </main>
       <Footer />
     </div>
   );
 };
 
-export default PricingPage;
+export default FaqPage;

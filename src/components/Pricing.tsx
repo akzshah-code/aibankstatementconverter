@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { User } from '../lib/types';
 
 interface Plan {
   name: string;
@@ -24,7 +25,7 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
   ],
 };
 
-const PricingCard: React.FC<{ plan: Plan }> = ({ plan }) => (
+const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = ({ plan, onCtaClick }) => (
     <div className="border border-gray-200 rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-shadow duration-300">
       <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
       
@@ -42,12 +43,12 @@ const PricingCard: React.FC<{ plan: Plan }> = ({ plan }) => (
         )}
       </div>
 
-      <a
-        href={plan.isEnterprise ? '#contact' : '#register'}
+      <button
+        onClick={() => onCtaClick(plan)}
         className="w-full text-center bg-brand-blue text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
       >
         {plan.isEnterprise ? 'Contact Us' : 'Get Started'}
-      </a>
+      </button>
       
       {!plan.isEnterprise && (
         <ul className="mt-8 pt-6 border-t border-gray-100 space-y-4">
@@ -64,9 +65,63 @@ const PricingCard: React.FC<{ plan: Plan }> = ({ plan }) => (
     </div>
 );
 
-const Pricing = () => {
+const Pricing = ({ user }: { user: User | null }) => {
     const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
     const currentPlans = pricingData[planType];
+
+    const handleGetStartedClick = (plan: Plan) => {
+        if (plan.isEnterprise) {
+            window.location.hash = '#contact';
+            return;
+        }
+
+        if (!user) {
+            window.location.hash = '#register';
+            return;
+        }
+
+        const amountInRupees = parseInt(plan.price.replace(/[^0-9]/g, ''), 10);
+        if (isNaN(amountInRupees)) {
+            console.error("Could not parse price:", plan.price);
+            alert("An error occurred with the selected plan. Please try again.");
+            return;
+        }
+        const amountInPaise = amountInRupees * 100;
+
+        const options = {
+            key: 'rzp_test_ILzsdpdT_2e3cr', // Public test key
+            amount: amountInPaise,
+            currency: 'INR',
+            name: 'BankConverts',
+            description: `${plan.name} Plan - ${planType === 'monthly' ? 'Monthly' : 'Annual'}`,
+            handler: function (response: { razorpay_payment_id: string }) {
+                alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+                // In a real app, you would send the payment ID to your backend
+                // to verify the payment and update the user's subscription status.
+            },
+            prefill: {
+                name: user.name,
+                email: user.email,
+            },
+            theme: {
+                color: '#2563EB', // Brand blue color
+            },
+            modal: {
+                ondismiss: function () {
+                    console.log('Payment modal dismissed by user.');
+                },
+            },
+        };
+
+        if (!window.Razorpay) {
+            alert('Payment gateway is not available. Please try again later.');
+            return;
+        }
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    };
+
 
     return (
         <section className="py-20 bg-white">
@@ -91,7 +146,7 @@ const Pricing = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {currentPlans.map((plan) => (
-                        <PricingCard key={plan.name} plan={plan} />
+                        <PricingCard key={plan.name} plan={plan} onCtaClick={handleGetStartedClick} />
                     ))}
                 </div>
             </div>

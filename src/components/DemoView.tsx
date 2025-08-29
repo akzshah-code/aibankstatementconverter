@@ -7,7 +7,7 @@ const StatCard = ({ title, value }: { title: string; value: string | number }) =
   </div>
 );
 
-const DemoView = ({ onReset }: { onReset: () => void }) => {
+const DemoView = ({ onExitDemo }: { onExitDemo: () => void }) => {
   
   const handleDownload = () => {
     const headers = ['Date', 'Description', 'Amount', 'Currency', 'Type'];
@@ -94,7 +94,7 @@ const DemoView = ({ onReset }: { onReset: () => void }) => {
           Download CSV
         </button>
         <button 
-          onClick={onReset}
+          onClick={onExitDemo}
           className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300 transition-colors duration-200"
         >
           Start Over
