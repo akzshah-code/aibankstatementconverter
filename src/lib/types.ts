@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: 'user' | 'admin';
-  plan: 'Free' | 'Starter' | 'Professional';
+  plan: 'Free' | 'Starter' | 'Professional' | 'Business';
   usage: {
     used: number;
     total: number;

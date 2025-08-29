@@ -25,9 +25,14 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
   ],
 };
 
-const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = ({ plan, onCtaClick }) => (
-    <div className="border border-gray-200 rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-shadow duration-300 bg-white">
-      <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
+const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
+    const isCurrentPlan = plan.name === userPlan;
+    return (
+        <div className={`border rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-all duration-300 bg-white ${isCurrentPlan ? 'border-brand-blue border-2' : 'border-gray-200'}`}>
+        <div className="flex justify-between items-start">
+            <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
+            {isCurrentPlan && <span className="text-xs font-semibold bg-brand-blue-light text-brand-blue px-2 py-1 rounded-full">Current Plan</span>}
+        </div>
       
       <div className="flex-grow mt-4">
         {plan.isEnterprise ? (
@@ -45,9 +50,10 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = 
 
       <button
         onClick={() => onCtaClick(plan)}
-        className="w-full text-center bg-brand-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200"
+        disabled={isCurrentPlan}
+        className="w-full text-center bg-brand-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        {plan.isEnterprise ? 'Contact Us' : 'Get Started'}
+        {plan.isEnterprise ? 'Contact Us' : isCurrentPlan ? 'Your Current Plan' : 'Get Started'}
       </button>
       
       {!plan.isEnterprise && (
@@ -63,7 +69,8 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = 
         </ul>
       )}
     </div>
-);
+    )
+};
 
 const Pricing = ({ user }: { user: User | null }) => {
     const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
@@ -76,10 +83,12 @@ const Pricing = ({ user }: { user: User | null }) => {
         }
 
         if (!user) {
-            window.location.hash = '#register';
+            // Pass plan info to registration page via query params in the hash
+            window.location.hash = `#register?plan=${plan.name}&cycle=${planType}`;
             return;
         }
 
+        // User is logged in, proceed to payment
         const amountInRupees = parseInt(plan.price.replace(/[^0-9]/g, ''), 10);
         if (isNaN(amountInRupees)) {
             console.error("Could not parse price:", plan.price);
@@ -96,8 +105,6 @@ const Pricing = ({ user }: { user: User | null }) => {
             description: `${plan.name} Plan - ${planType === 'monthly' ? 'Monthly' : 'Annual'}`,
             handler: function (response: { razorpay_payment_id: string }) {
                 alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
-                // In a real app, you would send the payment ID to your backend
-                // to verify the payment and update the user's subscription status.
             },
             prefill: {
                 name: user.name,
@@ -146,7 +153,12 @@ const Pricing = ({ user }: { user: User | null }) => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {currentPlans.map((plan) => (
-                        <PricingCard key={plan.name} plan={plan} onCtaClick={handleGetStartedClick} />
+                        <PricingCard 
+                          key={plan.name} 
+                          plan={plan} 
+                          onCtaClick={handleGetStartedClick}
+                          userPlan={user?.plan}
+                        />
                     ))}
                 </div>
             </div>

@@ -1,10 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { User, BlogPost, EmailTemplate, EmailRoute } from './lib/types';
 import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
+import { getPlanDetails } from './lib/plans';
 
 // --- Lazy-loaded Page Components ---
-// By using React.lazy, we ensure that the code for each page is only downloaded
-// when the user navigates to it. This is a key optimization for performance.
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -16,7 +15,6 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
 
 
-// A simple, centered loading indicator to show while pages are being loaded.
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center">
@@ -29,7 +27,6 @@ const LoadingFallback = () => (
 function App() {
   const [route, setRoute] = useState(window.location.hash);
   
-  // Initialize user state from localStorage to persist login across refreshes
   const [user, setUser] = useState<User | null>(() => {
     try {
       const savedUser = localStorage.getItem('loggedInUser');
@@ -40,18 +37,16 @@ function App() {
     }
   });
   
-  // Centralized state for mock data
   const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
   const [allPosts, setAllPosts] = useState<BlogPost[]>(initialBlogPosts);
   const [allTemplates, setAllTemplates] = useState<EmailTemplate[]>(initialEmailTemplates);
   const [allRoutes, setAllRoutes] = useState<EmailRoute[]>(initialEmailRoutes);
 
 
-  // Effect to handle hash-based routing
   useEffect(() => {
     const handleHashChange = () => {
       setRoute(window.location.hash);
-      window.scrollTo(0, 0); // Scroll to top on page change
+      window.scrollTo(0, 0); 
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -62,7 +57,6 @@ function App() {
     };
   }, []);
 
-  // Effect to save user to localStorage whenever it changes
   useEffect(() => {
     try {
       if (user) {
@@ -81,45 +75,76 @@ function App() {
       setUser(foundUser);
       window.location.hash = foundUser.role === 'admin' ? '#admin' : '#dashboard';
     } else {
-      // For demo purposes, log in any other email as a standard user
+      // Fallback for demo purposes: if user doesn't exist, create a new free user.
+      // The primary path for new users is the registration flow.
+      const freePlanDetails = getPlanDetails('Free');
       const standardUser: User = {
-        id: 'usr_new',
+        id: `usr_${Date.now()}`,
         name: 'New User',
         email: email,
         role: 'user',
         plan: 'Free',
-        usage: { used: 0, total: 5 },
+        usage: { used: 0, total: freePlanDetails.pages },
         planRenews: 'N/A',
       };
       setUser(standardUser);
-      setAllUsers([...allUsers, standardUser]); // Add new user to our mock data state
+      setAllUsers([...allUsers, standardUser]);
       window.location.hash = '#dashboard';
     }
   };
   
+  const handleRegister = (fullName: string, email: string, planName: User['plan'], billingCycle: string) => {
+    const existingUser = allUsers.find(u => u.email === email);
+    if (existingUser) {
+      alert("An account with this email already exists. Please log in.");
+      window.location.hash = '#login';
+      return;
+    }
+
+    const planDetails = getPlanDetails(planName);
+    const newUser: User = {
+      id: `usr_${Date.now()}`,
+      name: fullName,
+      email: email,
+      role: 'user',
+      plan: planName,
+      usage: { used: 0, total: planDetails.pages },
+      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now', // Placeholder
+    };
+
+    setAllUsers(prev => [...prev, newUser]);
+    setUser(newUser);
+    // If it's a paid plan, redirect to pricing to trigger payment. Otherwise, go to dashboard.
+    if (planName !== 'Free') {
+       window.location.hash = '#pricing';
+    } else {
+       window.location.hash = '#dashboard';
+    }
+  };
+
   const handleLogout = () => {
     setUser(null);
     window.location.hash = '#login';
   };
 
   const renderPage = () => {
-    // Redirect to login if trying to access protected routes without a user
-    if (!user && (route === '#dashboard' || route === '#admin')) {
+    if (!user && (route.startsWith('#dashboard') || route.startsWith('#admin'))) {
       return <LoginPage onLogin={handleLogin} />;
     }
 
-    // Admin access control
-    if (user?.role !== 'admin' && route === '#admin') {
+    if (user?.role !== 'admin' && route.startsWith('#admin')) {
       return <DashboardPage user={user} onLogout={handleLogout} />;
     }
     
-    // Blog Post Detail Page Route
     if (route.startsWith('#blog/')) {
       const postId = route.split('/')[1];
       return <BlogPostPage posts={allPosts} postId={postId} user={user} onLogout={handleLogout} />;
     }
 
-    switch (route) {
+    // Use startsWith to handle query parameters in the hash
+    const currentRoute = route.split('?')[0];
+
+    switch (currentRoute) {
       case '#pricing':
         return <PricingPage user={user} onLogout={handleLogout} />;
       case '#faq':
@@ -127,7 +152,7 @@ function App() {
       case '#login':
         return <LoginPage onLogin={handleLogin} />;
       case '#register':
-        return <RegisterPage />;
+        return <RegisterPage onRegister={handleRegister} />;
       case '#dashboard':
         return <DashboardPage user={user} onLogout={handleLogout} />;
       case '#blog':
