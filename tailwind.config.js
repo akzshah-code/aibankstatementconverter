@@ -3,9 +3,11 @@ import defaultTheme from 'tailwindcss/defaultTheme'
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  "./index.html",
+  "./src/**/*.{js,ts,jsx,tsx}",
+  "./components/**/*.{js,ts,jsx,tsx}",
+  "./layouts/**/*.{js,ts,jsx,tsx}",
+],
   theme: {
     // In Tailwind CSS v4 alpha, the `extend` key is removed.
     // We spread the default theme and add our custom configurations directly.
