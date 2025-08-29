@@ -11,13 +11,15 @@ export default {
     // We spread the default theme and add our custom configurations directly.
     colors: {
       ...defaultTheme.colors,
-      // Existing brand colors to prevent breaking the UI
-      'brand-blue': '#2563EB',
-      'brand-blue-light': '#EFF6FF',
-      'brand-green': '#10B981',
-      'brand-dark': '#111827',
-      'brand-gray': '#6B7280',
-      // New colors from user's request, structured correctly
+      // Grouped all brand colors into a single nested object for consistency
+      // and to fix issues with the Tailwind v4 parser.
+      brand: {
+        blue: '#2563EB',
+        'blue-light': '#EFF6FF',
+        green: '#10B981',
+        dark: '#111827',
+        gray: '#6B7280',
+      },
       primary: {
         DEFAULT: '#4F46E5', // indigo-600
         hover: '#4338CA'    // indigo-700
