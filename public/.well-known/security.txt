@@ -1,0 +1,11 @@
+# Allow all crawlers full access to the site for optimal SEO.
+User-agent: *
+Disallow:
+
+# Point crawlers to the sitemap for better indexing.
+Sitemap: https://www.bankconverts.com/sitemap.xml# This file provides a way for security researchers to report vulnerabilities.
+# We appreciate the security community's efforts in creating a safer web.
+Contact: mailto:security@bankconverts.com
+Expires: 2026-08-30T12:00:00.000Z
+Acknowledgments: https://www.bankconverts.com/security/acknowledgments
+Preferred-Languages: en

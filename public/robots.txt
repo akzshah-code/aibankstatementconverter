@@ -1,0 +1,6 @@
+# Allow all crawlers full access to the site for optimal SEO.
+User-agent: *
+Disallow:
+
+# Point crawlers to the sitemap for better indexing.
+Sitemap: https://www.bankconverts.com/sitemap.xml
