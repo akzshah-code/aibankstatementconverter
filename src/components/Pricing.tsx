@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../lib/types';
 
 interface Plan {
@@ -15,31 +15,29 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
     { name: 'Starter', price: '₹875', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['400 pages / month'] },
     { name: 'Professional', price: '₹1,850', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['1000 pages / month'] },
     { name: 'Business', price: '₹3,100', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['4000 pages / month'] },
-    // FIX: Removed duplicate 'name' property to resolve a TypeScript error. The Enterprise plan's display name is now handled conditionally in the PricingCard component, using 'Free' for type safety.
-    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true /* Placeholder for type safety */ },
+    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
   annual: [
     { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4800 pages / year'] },
     { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['12000 pages / year'] },
     { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['48000 pages / year'] },
-    // FIX: Removed duplicate 'name' property to resolve a TypeScript error. The Enterprise plan's display name is now handled conditionally in the PricingCard component, using 'Free' for type safety.
-    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true /* Placeholder for type safety */ },
+    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
   ],
 };
+
 
 interface PricingProps {
     user: User | null;
     onPaymentSuccess: (planName: User['plan'], billingCycle: 'monthly' | 'annual') => void;
 }
 
-const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
+const PricingCard: React.FC<{ plan: Plan; onCtaClick: () => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
     const isCurrentPlan = plan.name === userPlan && !plan.isEnterprise;
     return (
-        <div className={`border rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-all duration-300 bg-white ${isCurrentPlan ? 'border-brand-blue border-2' : 'border-gray-200'}`}>
+        <div className={`border rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-all duration-300 bg-white ${isCurrentPlan ? 'border-brand-primary border-2' : 'border-gray-200'}`}>
         <div className="flex justify-between items-start">
-            {/* FIX: Conditionally render the plan name to display 'Enterprise' for the special enterprise plan, which is identified by the `isEnterprise` flag. */}
             <h3 className="text-xl font-semibold text-brand-dark">{plan.isEnterprise ? 'Enterprise' : plan.name}</h3>
-            {isCurrentPlan && <span className="text-xs font-semibold bg-brand-blue-light text-brand-blue px-2 py-1 rounded-full">Current Plan</span>}
+            {isCurrentPlan && <span className="text-xs font-semibold bg-brand-blue-light text-brand-primary px-2 py-1 rounded-full">Current Plan</span>}
         </div>
       
       <div className="flex-grow mt-4">
@@ -57,7 +55,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; user
       </div>
 
       <button
-        onClick={() => onCtaClick(plan)}
+        onClick={onCtaClick}
         disabled={isCurrentPlan}
         className="w-full text-center bg-brand-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
@@ -71,108 +69,139 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; user
               <svg className="h-5 w-5 text-brand-green mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span className="text-brand-dark">{feature}</span>
+              <span className="text-brand-dark text-sm">{feature}</span>
             </li>
           ))}
         </ul>
       )}
     </div>
-    )
+    );
 };
 
+
 const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
-    const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
-    const currentPlans = pricingData[planType];
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+    const plans = pricingData[billingCycle];
 
-    const handleGetStartedClick = (plan: Plan) => {
-        if (plan.isEnterprise) {
-            window.location.hash = '#contact';
-            return;
-        }
-
+    const openRazorpayModal = (plan: Plan) => {
         if (!user) {
-            window.location.hash = `#register?plan=${plan.name}&cycle=${planType}`;
+            alert("An unexpected error occurred. Please log in again.");
+            window.location.hash = '#login';
             return;
         }
 
-        const amountInRupees = parseInt(plan.price.replace(/[^0-9]/g, ''), 10);
-        if (isNaN(amountInRupees)) {
-            console.error("Could not parse price:", plan.price);
-            alert("An error occurred with the selected plan. Please try again.");
-            return;
-        }
-        const amountInPaise = amountInRupees * 100;
-
+        const priceInPaise = parseInt(plan.price.replace(/[^0-9]/g, '')) * 100;
+        
         const options = {
-            key: 'rzp_test_ILzsdpdT_2e3cr', // Public test key
-            amount: amountInPaise,
+            key: 'rzp_test_YOUR_KEY_HERE', // IMPORTANT: Replace with your actual Razorpay Key ID
+            amount: priceInPaise,
             currency: 'INR',
             name: 'BankConverts',
-            description: `${plan.name} Plan - ${planType === 'monthly' ? 'Monthly' : 'Annual'}`,
-            handler: function (response: { razorpay_payment_id: string }) {
-                console.log(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
-                onPaymentSuccess(plan.name, planType);
+            description: `Subscription - ${plan.name} (${billingCycle})`,
+            image: '/logo.png',
+            handler: (response: any) => {
+                console.log('Payment success response:', response);
+                onPaymentSuccess(plan.name, billingCycle);
             },
             prefill: {
                 name: user.name,
                 email: user.email,
             },
             theme: {
-                color: '#4F46E5', // Corresponds to brand.primary
+                color: '#4F46E5', // Matches brand-primary
             },
             modal: {
-                ondismiss: function () {
-                    console.log('Payment modal dismissed by user.');
-                },
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            events: {
-                'payment.failed': function (response: any) {
-                    console.error('Payment Failed:', response.error);
-                    const reason = response.error.reason ? `Reason: ${response.error.reason}` : 'Please check your payment details and try again.';
-                    alert(`Oops! Something went wrong.\nPayment Failed.\n${reason}`);
+                ondismiss: () => {
+                    alert('Payment was cancelled.');
                 }
-            }
+            },
+            'callback_url': `https://www.bankconverts.com/#dashboard?payment_id=`,
+            'redirect': true
         };
-
-        if (!window.Razorpay) {
-            alert('Payment gateway is not available. Please try again later.');
-            return;
-        }
-
+        
         const rzp = new window.Razorpay(options);
+
+        rzp.on('payment.failed', (response: any) => {
+             alert(`Payment Failed: ${response.error.description}. Please try again.`);
+        });
+        
         rzp.open();
     };
 
 
+    const handleGetStartedClick = (plan: Plan) => {
+        if (plan.isEnterprise) {
+            window.location.hash = '#contact'; // Or open a contact modal
+            return;
+        }
+
+        if (user) {
+            // User is logged in, initiate payment
+            openRazorpayModal(plan);
+        } else {
+            // User is a guest, redirect to registration
+            window.location.hash = `#register?plan=${plan.name}&cycle=${billingCycle}`;
+        }
+    };
+    
+    // Auto-trigger payment modal for new users after registration.
+    useEffect(() => {
+        const hash = window.location.hash;
+        const queryIndex = hash.indexOf('?');
+        const params = new URLSearchParams(queryIndex > -1 ? hash.substring(queryIndex) : '');
+
+        if (params.get('autoPay') === 'true' && user) {
+            const planName = params.get('plan') as User['plan'];
+            const cycle = (params.get('cycle') as 'monthly' | 'annual') || 'monthly';
+            
+            const planToPay = pricingData[cycle].find(p => p.name === planName);
+
+            if (planToPay) {
+                openRazorpayModal(planToPay);
+                // Clean up URL after triggering payment
+                window.history.replaceState(null, '', '#pricing');
+            }
+        }
+    }, [user]); // Rerun when user state is confirmed after registration.
+
     return (
         <section className="py-20">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <div className="inline-flex items-center border border-gray-200 p-1 rounded-full bg-brand-blue-light mb-12">
-                    <button 
-                        onClick={() => setPlanType('monthly')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-brand-primary text-white' : 'text-brand-dark'}`}
-                    >
-                        Monthly
-                    </button>
-                    <button 
-                        onClick={() => setPlanType('annual')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-brand-primary text-white' : 'text-brand-dark'}`}
-                    >
-                        Annual
-                        <span className="absolute -top-2 -right-4 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                            Save 50%
-                        </span>
-                    </button>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-3xl mx-auto text-center">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark">
+                        Find the Perfect Plan
+                    </h1>
+                    <p className="mt-4 text-lg text-brand-gray">
+                        Start for free, then scale up as you grow. All plans include our core features.
+                    </p>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {currentPlans.map((plan) => (
+                {/* Billing Toggle */}
+                <div className="mt-12 flex justify-center items-center space-x-4">
+                    <span className={`font-semibold ${billingCycle === 'monthly' ? 'text-brand-primary' : 'text-brand-gray'}`}>Monthly</span>
+                    <div className="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                        <input 
+                            type="checkbox" 
+                            name="toggle" 
+                            id="toggle" 
+                            checked={billingCycle === 'annual'}
+                            onChange={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                            className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                        />
+                        <label htmlFor="toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    </div>
+                     <span className={`font-semibold ${billingCycle === 'annual' ? 'text-brand-primary' : 'text-brand-gray'}`}>Annual</span>
+                    <span className="bg-brand-green/20 text-brand-green text-xs font-bold px-2 py-1 rounded-full">Save 25%</span>
+                </div>
+
+                {/* Pricing Grid */}
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {plans.map(plan => (
                         <PricingCard 
-                          key={`${planType}-${plan.name}`}
-                          plan={plan} 
-                          onCtaClick={handleGetStartedClick}
-                          userPlan={user?.plan}
+                            key={plan.name} 
+                            plan={plan} 
+                            onCtaClick={() => handleGetStartedClick(plan)}
+                            userPlan={user?.plan}
                         />
                     ))}
                 </div>

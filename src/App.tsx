@@ -37,7 +37,17 @@ function App() {
     }
   });
   
-  const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
+  // FIX: Persist the master list of all users to localStorage to prevent data loss on refresh.
+  const [allUsers, setAllUsers] = useState<User[]>(() => {
+    try {
+      const savedUsers = localStorage.getItem('allUsers');
+      return savedUsers ? JSON.parse(savedUsers) : initialUsers;
+    } catch (error) {
+      console.error("Failed to parse allUsers from localStorage", error);
+      return initialUsers;
+    }
+  });
+
   const [allPosts, setAllPosts] = useState<BlogPost[]>(initialBlogPosts);
   const [allTemplates, setAllTemplates] = useState<EmailTemplate[]>(initialEmailTemplates);
   const [allRoutes, setAllRoutes] = useState<EmailRoute[]>(initialEmailRoutes);
@@ -57,6 +67,7 @@ function App() {
     };
   }, []);
 
+  // Persist the currently logged-in user's session.
   useEffect(() => {
     try {
       if (user) {
@@ -68,6 +79,16 @@ function App() {
       console.error("Failed to save user to localStorage", error);
     }
   }, [user]);
+
+  // Persist the master user list whenever it changes.
+  useEffect(() => {
+    try {
+      localStorage.setItem('allUsers', JSON.stringify(allUsers));
+    } catch (error) {
+      console.error("Failed to save allUsers to localStorage", error);
+    }
+  }, [allUsers]);
+
 
   const handleLogin = (email: string) => {
     const foundUser = allUsers.find(u => u.email === email);
@@ -114,9 +135,11 @@ function App() {
 
     setAllUsers(prev => [...prev, newUser]);
     setUser(newUser);
+    
     // If it's a paid plan, redirect to pricing to trigger payment. Otherwise, go to dashboard.
     if (planName !== 'Free') {
-       window.location.hash = '#pricing';
+       // FIX: Redirect to pricing page with params to auto-trigger the payment modal.
+       window.location.hash = `#pricing?autoPay=true&plan=${planName}&cycle=${billingCycle}`;
     } else {
        window.location.hash = '#dashboard';
     }
