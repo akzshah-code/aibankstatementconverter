@@ -17,10 +17,12 @@ export default {
       'brand-green': '#10B981',
       'brand-dark': '#111827',
       'brand-gray': '#6B7280',
-      // New colors from user's request
-      'primary': '#4F46E5', // indigo-600
-      'primary-hover': '#4338CA', // indigo-700
-      'secondary': '#6c757d',
+      // New colors from user's request, structured correctly
+      primary: {
+        DEFAULT: '#4F46E5', // indigo-600
+        hover: '#4338CA'    // indigo-700
+      },
+      secondary: '#6c757d',
     },
     fontFamily: {
       ...defaultTheme.fontFamily,
