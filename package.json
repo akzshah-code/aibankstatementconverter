@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-   "dev": "wrangler pages dev -- npm run dev:vite",
+    "dev": "wrangler pages dev --proxy 5174 -- npm run dev:vite",
     "dev:vite": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
