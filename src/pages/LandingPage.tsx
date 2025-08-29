@@ -14,9 +14,9 @@ interface LandingPageProps {
 
 const LandingPage = ({ user, onLogout }: LandingPageProps) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       <Header user={user} onLogout={onLogout} />
-      <main className="flex-grow">
+      <main className="flex-grow overflow-y-auto">
         <Hero />
         <Features />
         <BankSupport />

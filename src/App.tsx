@@ -101,7 +101,7 @@ function App() {
       return;
     }
 
-    const planDetails = getPlanDetails(planName);
+    const planDetails = getPlanDetails(planName, billingCycle as 'monthly' | 'annual');
     const newUser: User = {
       id: `usr_${Date.now()}`,
       name: fullName,
@@ -134,7 +134,7 @@ function App() {
       return;
     }
     
-    const planDetails = getPlanDetails(planName);
+    const planDetails = getPlanDetails(planName, billingCycle);
     const updatedUser: User = {
       ...user,
       plan: planName,

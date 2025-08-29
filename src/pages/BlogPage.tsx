@@ -27,9 +27,9 @@ const BlogPostCard: React.FC<{ post: BlogPost }> = ({ post }) => (
 
 const BlogPage = ({ posts, user, onLogout }: BlogPageProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <main className="flex-grow overflow-y-auto container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark">Our Blog</h1>
             <p className="text-lg text-brand-gray mt-4 max-w-2xl mx-auto">Insights, tutorials, and updates from the BankConverts team.</p>
