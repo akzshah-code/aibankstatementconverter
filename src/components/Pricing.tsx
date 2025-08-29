@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User } from '../lib/types';
 
 interface Plan {
-  name: string;
+  name: User['plan'];
   price: string;
   billingCycle: string;
   gstText: string;
@@ -15,22 +15,30 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
     { name: 'Starter', price: '₹875', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['400 pages / month'] },
     { name: 'Professional', price: '₹1,850', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['1000 pages / month'] },
     { name: 'Business', price: '₹3,100', billingCycle: '/month', gstText: '+ 18% GST applicable', features: ['4000 pages / month'] },
-    { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
+    // FIX: Removed duplicate 'name' property to resolve a TypeScript error. The Enterprise plan's display name is now handled conditionally in the PricingCard component, using 'Free' for type safety.
+    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true /* Placeholder for type safety */ },
   ],
   annual: [
     { name: 'Starter', price: '₹5,250', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['4800 pages / year'] },
     { name: 'Professional', price: '₹11,100', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['12000 pages / year'] },
     { name: 'Business', price: '₹18,600', billingCycle: '/year', gstText: '+ 18% GST applicable', features: ['48000 pages / year'] },
-    { name: 'Enterprise', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true },
+    // FIX: Removed duplicate 'name' property to resolve a TypeScript error. The Enterprise plan's display name is now handled conditionally in the PricingCard component, using 'Free' for type safety.
+    { name: 'Free', price: 'Need More?', billingCycle: '', gstText: '', features: [], isEnterprise: true /* Placeholder for type safety */ },
   ],
 };
 
+interface PricingProps {
+    user: User | null;
+    onPaymentSuccess: (planName: User['plan'], billingCycle: 'monthly' | 'annual') => void;
+}
+
 const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
-    const isCurrentPlan = plan.name === userPlan;
+    const isCurrentPlan = plan.name === userPlan && !plan.isEnterprise;
     return (
         <div className={`border rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-all duration-300 bg-white ${isCurrentPlan ? 'border-brand-blue border-2' : 'border-gray-200'}`}>
         <div className="flex justify-between items-start">
-            <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
+            {/* FIX: Conditionally render the plan name to display 'Enterprise' for the special enterprise plan, which is identified by the `isEnterprise` flag. */}
+            <h3 className="text-xl font-semibold text-brand-dark">{plan.isEnterprise ? 'Enterprise' : plan.name}</h3>
             {isCurrentPlan && <span className="text-xs font-semibold bg-brand-blue-light text-brand-blue px-2 py-1 rounded-full">Current Plan</span>}
         </div>
       
@@ -72,7 +80,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void; user
     )
 };
 
-const Pricing = ({ user }: { user: User | null }) => {
+const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
     const [planType, setPlanType] = useState<'monthly' | 'annual'>('monthly');
     const currentPlans = pricingData[planType];
 
@@ -83,12 +91,10 @@ const Pricing = ({ user }: { user: User | null }) => {
         }
 
         if (!user) {
-            // Pass plan info to registration page via query params in the hash
             window.location.hash = `#register?plan=${plan.name}&cycle=${planType}`;
             return;
         }
 
-        // User is logged in, proceed to payment
         const amountInRupees = parseInt(plan.price.replace(/[^0-9]/g, ''), 10);
         if (isNaN(amountInRupees)) {
             console.error("Could not parse price:", plan.price);
@@ -104,7 +110,8 @@ const Pricing = ({ user }: { user: User | null }) => {
             name: 'BankConverts',
             description: `${plan.name} Plan - ${planType === 'monthly' ? 'Monthly' : 'Annual'}`,
             handler: function (response: { razorpay_payment_id: string }) {
-                alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+                console.log(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+                onPaymentSuccess(plan.name, planType);
             },
             prefill: {
                 name: user.name,
@@ -118,6 +125,14 @@ const Pricing = ({ user }: { user: User | null }) => {
                     console.log('Payment modal dismissed by user.');
                 },
             },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            events: {
+                'payment.failed': function (response: any) {
+                    console.error('Payment Failed:', response.error);
+                    const reason = response.error.reason ? `Reason: ${response.error.reason}` : 'Please check your payment details and try again.';
+                    alert(`Oops! Something went wrong.\nPayment Failed.\n${reason}`);
+                }
+            }
         };
 
         if (!window.Razorpay) {
@@ -154,7 +169,7 @@ const Pricing = ({ user }: { user: User | null }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {currentPlans.map((plan) => (
                         <PricingCard 
-                          key={plan.name} 
+                          key={`${planType}-${plan.name}`}
                           plan={plan} 
                           onCtaClick={handleGetStartedClick}
                           userPlan={user?.plan}

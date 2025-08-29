@@ -127,6 +127,28 @@ function App() {
     window.location.hash = '#login';
   };
 
+  const handlePaymentSuccess = (planName: User['plan'], billingCycle: 'monthly' | 'annual') => {
+    if (!user) {
+      alert("You must be logged in to upgrade your plan.");
+      window.location.hash = '#login';
+      return;
+    }
+    
+    const planDetails = getPlanDetails(planName);
+    const updatedUser: User = {
+      ...user,
+      plan: planName,
+      usage: { used: 0, total: planDetails.pages },
+      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now', // Placeholder
+    };
+
+    setUser(updatedUser);
+    setAllUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+
+    alert(`Upgrade successful! You are now on the ${planName} plan.`);
+    window.location.hash = '#dashboard';
+  };
+
   const renderPage = () => {
     if (!user && (route.startsWith('#dashboard') || route.startsWith('#admin'))) {
       return <LoginPage onLogin={handleLogin} />;
@@ -146,7 +168,7 @@ function App() {
 
     switch (currentRoute) {
       case '#pricing':
-        return <PricingPage user={user} onLogout={handleLogout} />;
+        return <PricingPage user={user} onLogout={handleLogout} onPaymentSuccess={handlePaymentSuccess} />;
       case '#faq':
         return <FaqPage user={user} onLogout={handleLogout} />;
       case '#login':
