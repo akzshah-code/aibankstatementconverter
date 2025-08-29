@@ -26,7 +26,7 @@ const pricingData: { monthly: Plan[]; annual: Plan[] } = {
 };
 
 const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = ({ plan, onCtaClick }) => (
-    <div className="border border-gray-200 rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-shadow duration-300">
+    <div className="border border-gray-200 rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-shadow duration-300 bg-white">
       <h3 className="text-xl font-semibold text-brand-dark">{plan.name}</h3>
       
       <div className="flex-grow mt-4">
@@ -45,7 +45,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = 
 
       <button
         onClick={() => onCtaClick(plan)}
-        className="w-full text-center bg-brand-blue text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+        className="w-full text-center bg-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-primary-hover transition-colors duration-200"
       >
         {plan.isEnterprise ? 'Contact Us' : 'Get Started'}
       </button>
@@ -54,7 +54,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: (plan: Plan) => void }> = 
         <ul className="mt-8 pt-6 border-t border-gray-100 space-y-4">
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-brand-green mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               <span className="text-brand-dark">{feature}</span>
@@ -104,7 +104,7 @@ const Pricing = ({ user }: { user: User | null }) => {
                 email: user.email,
             },
             theme: {
-                color: '#2563EB', // Brand blue color
+                color: '#4F46E5', // Primary brand color
             },
             modal: {
                 ondismiss: function () {
@@ -124,18 +124,18 @@ const Pricing = ({ user }: { user: User | null }) => {
 
 
     return (
-        <section className="py-20 bg-white">
+        <section className="py-20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <div className="inline-flex items-center border border-gray-200 p-1 rounded-full bg-gray-50 mb-12">
+                <div className="inline-flex items-center border border-gray-200 p-1 rounded-full bg-brand-blue-light mb-12">
                     <button 
                         onClick={() => setPlanType('monthly')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-brand-blue text-white' : 'text-gray-600'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors ${planType === 'monthly' ? 'bg-primary text-white' : 'text-brand-dark'}`}
                     >
                         Monthly
                     </button>
                     <button 
                         onClick={() => setPlanType('annual')}
-                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-brand-blue text-white' : 'text-gray-600'}`}
+                        className={`px-6 py-2 rounded-full text-sm font-semibold transition-colors relative ${planType === 'annual' ? 'bg-primary text-white' : 'text-brand-dark'}`}
                     >
                         Annual
                         <span className="absolute -top-2 -right-4 bg-brand-green text-white text-xs font-bold px-2 py-0.5 rounded-full">

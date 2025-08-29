@@ -61,7 +61,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
                 <a 
                   key={link.label} 
                   href={link.href} 
-                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-brand-blue font-semibold' : 'text-gray-600 hover:text-brand-blue'}`}
+                  className={`transition-colors duration-200 ${link.isHighlighted ? 'text-brand-blue font-semibold' : 'text-brand-dark hover:text-brand-blue'}`}
                 >
                   {link.label}
                 </a>
@@ -71,7 +71,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
             {/* Primary Action Button */}
             <div>
               {user ? (
-                 <button onClick={onLogout} className="bg-gray-700 text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200">
+                 <button onClick={onLogout} className="bg-brand-dark text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-dark/90 transition-colors duration-200">
                   Logout
                 </button>
               ) : (
@@ -98,7 +98,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navLinks.map((link) => (
-              <a key={link.label} href={link.href} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brand-blue hover:bg-gray-50">{link.label}</a>
+              <a key={link.label} href={link.href} className="block px-3 py-2 rounded-md text-base font-medium text-brand-dark hover:text-brand-blue hover:bg-brand-blue-light">{link.label}</a>
             ))}
           </div>
         </div>

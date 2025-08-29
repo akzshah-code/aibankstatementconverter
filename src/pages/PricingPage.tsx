@@ -10,7 +10,7 @@ interface PricingPageProps {
 
 const PricingPage = ({ user, onLogout }: PricingPageProps) => {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header user={user} onLogout={onLogout} />
       <main className="flex-grow">
         <Pricing user={user} />

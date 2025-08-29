@@ -17,7 +17,7 @@ const Register = () => {
             autoComplete="name"
             placeholder="John Doe"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors"
           />
         </div>
         <div>
@@ -31,7 +31,7 @@ const Register = () => {
             autoComplete="email"
             placeholder="you@example.com"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors"
           />
         </div>
         <div>
@@ -45,13 +45,13 @@ const Register = () => {
             autoComplete="new-password"
             placeholder="••••••••"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue transition-colors"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors"
           />
         </div>
         <div>
           <button
             type="submit"
-            className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200"
+            className="w-full bg-primary text-white px-4 py-3 rounded-md font-semibold hover:bg-primary-hover transition-colors duration-200"
           >
             Register
           </button>
@@ -60,7 +60,7 @@ const Register = () => {
       <div className="text-center mt-6">
         <p className="text-sm text-brand-gray">
           Already have an account?{' '}
-          <a href="#login" className="font-semibold text-brand-blue hover:underline">
+          <a href="#login" className="font-semibold text-primary hover:text-primary-hover transition-colors">
             Login
           </a>
         </p>
