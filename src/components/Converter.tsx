@@ -122,25 +122,23 @@ const Converter = () => {
     setFile(unlockedFile);
   };
 
-  const callApiForPageImage = async (base64Data: string): Promise<ExtractedTransaction[]> => {
+  const callApiForPageImage = async (base64Data: string, mimeType: string): Promise<ExtractedTransaction[]> => {
     const response = await fetch('/api/proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64Data, mimeType: 'image/png' }),
+      body: JSON.stringify({ image: base64Data, mimeType }),
     });
 
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const errorText = await response.text();
-      console.error("Non-JSON response from server:", errorText);
-      throw new Error(`Server returned an unexpected response (Status: ${response.status}).`);
-    }
-
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || errorData.details || `API request failed with status ${response.status}`);
+        // Try to parse error JSON, but fall back to status text if that fails.
+        try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || errorData.details || `Server returned an unexpected response (Status: ${response.status}).`);
+        } catch (e) {
+            throw new Error(`Server returned an unexpected response (Status: ${response.status}).`);
+        }
     }
-
+    
     const responseData = await response.json();
     return responseData.transactions || [];
   };
@@ -177,10 +175,14 @@ const Converter = () => {
                 // requiring a `canvas` property that is not part of the standard API. Adding it here
                 // to satisfy the compiler. The library uses `canvasContext` at runtime.
                 await page.render({ canvas, canvasContext: context, viewport }).promise;
-                const dataUrl = canvas.toDataURL('image/png');
+                
+                // FIX: Use JPEG compression to reduce the size of the image data sent to the API.
+                // This prevents request body limits from being exceeded, which can cause JSON parsing errors.
+                const mimeType = 'image/jpeg';
+                const dataUrl = canvas.toDataURL(mimeType, 0.8); // 80% quality
                 const base64Data = dataUrl.split(',')[1];
                 
-                const promise = callApiForPageImage(base64Data).then(transactions => {
+                const promise = callApiForPageImage(base64Data, mimeType).then(transactions => {
                     setProgress(prev => ({ ...prev, processed: prev.processed + 1 }));
                     return transactions;
                 });
@@ -193,16 +195,44 @@ const Converter = () => {
 
       } else { // Handle images
         setProgress({ processed: 0, total: 1 });
-        const { data: base64Data } = await fileToBase64(file);
-        allTransactions = await callApiForPageImage(base64Data);
+        // FIX: Correctly pass the mime type of the uploaded image to the API.
+        const { data: base64Data, mimeType } = await fileToBase64(file);
+        allTransactions = await callApiForPageImage(base64Data, mimeType);
         setProgress({ processed: 1, total: 1 });
       }
 
       setResult(allTransactions);
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(`Conversion Failed: ${errorMessage}. Please try again later.`);
+        const baseMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      
+        // Default error message
+        let detailedError = baseMessage.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>');
+
+        // Provide specific, actionable advice for common API key errors.
+        if (baseMessage.includes('403')) {
+            detailedError = `
+                The server returned a '403 Forbidden' error. This usually means there's an issue with the API Key.
+                <br/><br/>
+                <strong class="mt-2 inline-block">Please check the following:</strong>
+                <ul class="list-disc list-inside mt-2 text-left">
+                    <li>The <strong>API_KEY</strong> in your <code>.dev.vars</code> file is correct.</li>
+                    <li>The API key is active and has not expired.</li>
+                    <li>Billing is enabled for the associated Google Cloud project.</li>
+                </ul>
+            `;
+        } else if (baseMessage.toLowerCase().includes('api key not valid')) {
+            detailedError = `
+                The provided API key is not valid.
+                <br/><br/>
+                <strong class="mt-2 inline-block">Please check the following:</strong>
+                <ul class="list-disc list-inside mt-2 text-left">
+                    <li>The <strong>API_KEY</strong> in your <code>.dev.vars</code> file is correct and has no typos.</li>
+                    <li>You have copied the entire key from the Google AI Studio or Cloud Console.</li>
+                </ul>
+            `;
+        }
+        setError(detailedError);
     } finally {
       setIsLoading(false);
     }
@@ -237,11 +267,11 @@ const Converter = () => {
     <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg mx-auto">
       {error && (
         <div className="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-            <p className="font-bold">Action Required</p>
-            <p className="text-sm" dangerouslySetInnerHTML={{ __html: error.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>') }}></p>
+            <p className="font-bold">Conversion Failed</p>
+            <div className="text-sm mt-2" dangerouslySetInnerHTML={{ __html: error }} />
             <button
               onClick={() => resetState()}
-              className="mt-3 bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 text-sm"
+              className="mt-4 bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200 text-sm"
             >
               Try Again
             </button>
@@ -335,7 +365,7 @@ const Converter = () => {
         <button 
           onClick={handleConvert}
           disabled={!file || isLoading || isCheckingPdf} 
-          className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-opacity-90 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200 disabled:bg-brand-blue/60 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isLoading ? (
             <>
