@@ -57,7 +57,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: () => void; userPlan: stri
       <button
         onClick={onCtaClick}
         disabled={isCurrentPlan}
-        className="w-full text-center bg-brand-primary text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="w-full text-center bg-brand-blue text-white px-4 py-3 mt-8 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         {plan.isEnterprise ? 'Contact Us' : isCurrentPlan ? 'Your Current Plan' : 'Get Started'}
       </button>
@@ -66,7 +66,7 @@ const PricingCard: React.FC<{ plan: Plan; onCtaClick: () => void; userPlan: stri
         <ul className="mt-8 pt-6 border-t border-gray-100 space-y-4">
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-center">
-              <svg className="h-5 w-5 text-brand-green mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-brand-primary mr-3 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               <span className="text-brand-dark text-sm">{feature}</span>
@@ -108,7 +108,7 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
                 email: user.email,
             },
             theme: {
-                color: '#4F46E5', // Matches brand-primary
+                color: '#2563EB', // Matches brand-blue
             },
             modal: {
                 ondismiss: () => {
@@ -177,21 +177,25 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
                 </div>
                 
                 {/* Billing Toggle */}
-                <div className="mt-12 flex justify-center items-center space-x-4">
-                    <span className={`font-semibold ${billingCycle === 'monthly' ? 'text-brand-primary' : 'text-brand-gray'}`}>Monthly</span>
-                    <div className="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
-                        <input 
-                            type="checkbox" 
-                            name="toggle" 
-                            id="toggle" 
-                            checked={billingCycle === 'annual'}
-                            onChange={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-                            className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                        />
-                        <label htmlFor="toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                <div className="mt-12 flex justify-center">
+                    <div className="relative flex w-full max-w-xs p-1 bg-gray-200 rounded-full">
+                        <button
+                            onClick={() => setBillingCycle('monthly')}
+                            className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
+                                billingCycle === 'monthly' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
+                            }`}
+                        >
+                            Monthly
+                        </button>
+                        <button
+                            onClick={() => setBillingCycle('annual')}
+                            className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
+                                billingCycle === 'annual' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
+                            }`}
+                        >
+                            Yearly
+                        </button>
                     </div>
-                     <span className={`font-semibold ${billingCycle === 'annual' ? 'text-brand-primary' : 'text-brand-gray'}`}>Annual</span>
-                    <span className="bg-brand-green/20 text-brand-green text-xs font-bold px-2 py-1 rounded-full">Save 25%</span>
                 </div>
 
                 {/* Pricing Grid */}
