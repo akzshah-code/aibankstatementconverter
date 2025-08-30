@@ -13,6 +13,10 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/Privacy.tsx'));
+const AboutPage = lazy(() => import('./pages/AboutPage.tsx'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
 
 const LoadingFallback = () => (
@@ -194,6 +198,14 @@ function App() {
         return <PricingPage user={user} onLogout={handleLogout} onPaymentSuccess={handlePaymentSuccess} />;
       case '#faq':
         return <FaqPage user={user} onLogout={handleLogout} />;
+      case '#terms':
+        return <TermsPage user={user} onLogout={handleLogout} />;
+      case '#privacy':
+        return <PrivacyPolicyPage user={user} onLogout={handleLogout} />;
+      case '#about':
+        return <AboutPage user={user} onLogout={handleLogout} />;
+      case '#contact':
+        return <ContactPage user={user} onLogout={handleLogout} />;
       case '#login':
         return <LoginPage onLogin={handleLogin} />;
       case '#register':

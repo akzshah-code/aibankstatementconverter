@@ -4,7 +4,7 @@ const Footer = () => {
     { href: '#terms', label: 'Terms' },
     { href: '#privacy', label: 'Privacy' },
     { href: '#faq', label: 'FAQ' },
-    { href: '#api', label: 'API' },
+    { href: '#contact', label: 'Contact' },
     { href: '#blog', label: 'Blog' },
   ];
 

@@ -1,9 +1,22 @@
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
+// FIX: In an ES module context, __dirname is not available. This is required to recreate it.
+import { fileURLToPath } from 'url'
+
+// FIX: Recreate __dirname for ES module scope.
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
   server: {
     port: 5174,
     strictPort: true, // Exit if port is already in use

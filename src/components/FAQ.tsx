@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, FunctionComponent } from 'react';
 
 const faqData = [
   {
@@ -23,7 +24,9 @@ const faqData = [
   },
 ];
 
-const FaqItem = ({ question, answer, isOpen, onClick }: { question: string, answer: string, isOpen: boolean, onClick: () => void }) => (
+// FIX: Explicitly type the component as a React.FunctionComponent (FC) to ensure TypeScript
+// correctly handles special React props like 'key' and doesn't treat it as a regular prop.
+const FaqItem: FunctionComponent<{ question: string, answer: string, isOpen: boolean, onClick: () => void }> = ({ question, answer, isOpen, onClick }) => (
   <div className="border-b">
     <button
       onClick={onClick}
