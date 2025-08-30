@@ -161,7 +161,8 @@ const Converter = () => {
         
         setProgress({ processed: 0, total: pageCount });
 
-        const pagePromises = [];
+        // FIX: Process pages sequentially instead of in parallel to avoid overwhelming
+        // the serverless backend, which can lead to truncated requests and JSON errors.
         for (let i = 1; i <= pageCount; i++) {
             const page = await pdfDoc.getPage(i);
             const viewport = page.getViewport({ scale: 1.5 }); // Higher scale for better OCR quality
@@ -171,31 +172,23 @@ const Converter = () => {
             canvas.width = viewport.width;
 
             if (context) {
-                // FIX: The project's TypeScript definitions for `pdfjs-dist` appear to be incorrect,
-                // requiring a `canvas` property that is not part of the standard API. Adding it here
-                // to satisfy the compiler. The library uses `canvasContext` at runtime.
                 await page.render({ canvas, canvasContext: context, viewport }).promise;
                 
-                // FIX: Use JPEG compression to reduce the size of the image data sent to the API.
-                // This prevents request body limits from being exceeded, which can cause JSON parsing errors.
                 const mimeType = 'image/jpeg';
                 const dataUrl = canvas.toDataURL(mimeType, 0.8); // 80% quality
                 const base64Data = dataUrl.split(',')[1];
                 
-                const promise = callApiForPageImage(base64Data, mimeType).then(transactions => {
-                    setProgress(prev => ({ ...prev, processed: prev.processed + 1 }));
-                    return transactions;
-                });
-                pagePromises.push(promise);
+                // Await each call individually
+                const transactionsForPage = await callApiForPageImage(base64Data, mimeType);
+                allTransactions.push(...transactionsForPage);
+
+                // Update progress after each page is processed
+                setProgress(prev => ({ ...prev, processed: i }));
             }
         }
 
-        const resultsByPage = await Promise.all(pagePromises);
-        allTransactions = resultsByPage.flat();
-
       } else { // Handle images
         setProgress({ processed: 0, total: 1 });
-        // FIX: Correctly pass the mime type of the uploaded image to the API.
         const { data: base64Data, mimeType } = await fileToBase64(file);
         allTransactions = await callApiForPageImage(base64Data, mimeType);
         setProgress({ processed: 1, total: 1 });
@@ -206,19 +199,18 @@ const Converter = () => {
     } catch (err) {
         const baseMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       
-        // Default error message
         let detailedError = baseMessage.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>');
 
-        // Provide specific, actionable advice for common API key errors.
         if (baseMessage.includes('403')) {
             detailedError = `
-                The server returned a '403 Forbidden' error. This usually means there's an issue with the API Key.
+                The server returned a '403 Forbidden' error. This usually means there's an issue with your API Key configuration.
                 <br/><br/>
-                <strong class="mt-2 inline-block">Please check the following:</strong>
+                <strong class="mt-2 inline-block">Please check the following in your Google Cloud project:</strong>
                 <ul class="list-disc list-inside mt-2 text-left">
                     <li>The <strong>API_KEY</strong> in your <code>.dev.vars</code> file is correct.</li>
-                    <li>The API key is active and has not expired.</li>
-                    <li>Billing is enabled for the associated Google Cloud project.</li>
+                    <li>The "Generative Language API" (also known as "Vertex AI API") is enabled.</li>
+                    <li>Billing is enabled for the project.</li>
+                    <li><strong>API Key Restrictions:</strong> Ensure your key has no application restrictions (e.g., HTTP referrers, IP addresses) that would block requests from this server. For testing, it's often easiest to set restrictions to 'None'.</li>
                 </ul>
             `;
         } else if (baseMessage.toLowerCase().includes('api key not valid')) {
@@ -271,7 +263,7 @@ const Converter = () => {
             <div className="text-sm mt-2" dangerouslySetInnerHTML={{ __html: error }} />
             <button
               onClick={() => resetState()}
-              className="mt-4 bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200 text-sm"
+              className="mt-4 text-sm font-semibold text-red-800 hover:text-red-600 transition-colors"
             >
               Try Again
             </button>

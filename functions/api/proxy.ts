@@ -107,8 +107,13 @@ export const onRequestPost = async ({ request, env }) => {
   } catch (error) {
     console.error("Error processing request:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    
+    // Attempt to extract the status code from the error object thrown by the Gemini API client.
+    // The 'cause' property often holds the original fetch response error.
+    const status = (error as any)?.cause?.status || 500;
+
     return new Response(JSON.stringify({ error: "Failed to process statement.", details: errorMessage }), {
-      status: 500,
+      status,
       headers: { "Content-Type": "application/json" },
     });
   }
