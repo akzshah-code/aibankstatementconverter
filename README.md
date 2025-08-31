@@ -6,6 +6,7 @@ A powerful and easy-to-use tool to convert bank statements from PDF or images in
 
 - [Node.js](https://nodejs.org/en) (v22.x or later recommended)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (for deployment)
 
 ## Getting Started
 
@@ -13,45 +14,65 @@ Follow these steps to get your development environment set up and running.
 
 ### 1. Install Dependencies
 
-This command will read the `package.json` file and install all the necessary libraries (like React, Tailwind CSS, and the local development server) into a `node_modules` folder inside your project.
-
-> **Note:** If you are updating dependencies or running this for the first time after cloning, it's best practice to perform a clean install. This prevents conflicts with old packages.
->
-> ```bash
-> # Optional: Delete old packages and the lock file
-> rm -rf node_modules package-lock.json
->
-> # Install all packages from scratch
-> npm install
-> ```
-
-### 2. Set Up Environment Variables
-
-The application requires API keys for Google AI and Razorpay to function. We'll use a local environment file to manage these securely.
-
-a. **Create a local `.dev.vars` file:**
-In your project's root directory, create a copy of the example file `.dev.vars.example`. Rename the copy to `.dev.vars`.
+This command will install all necessary libraries into a `node_modules` folder.
 
 ```bash
-cp .dev.vars.example .dev.vars
+npm install
 ```
 
-b. **Add your API keys:**
-Open the newly created `.dev.vars` file and replace the placeholder text with your actual Google Gemini API key and your Razorpay Key ID.
+### 2. Set Up Local Environment Variables
+
+The application requires API keys to function.
+
+a. In your project's root directory, create a new file named `.dev.vars`.
+
+b. Add your Google Gemini API key and your Razorpay Key ID in the following format.
 
 ```
-# .dev.vars
-API_KEY="PASTE_YOUR_GOOGLE_GEMINI_API_KEY_HERE"
-VITE_RAZORPAY_KEY_ID="PASTE_YOUR_RAZORPAY_KEY_ID_HERE"
+# .dev.vars - Do NOT include quotes
+
+API_KEY=PASTE_YOUR_GOOGLE_GEMINI_API_KEY_HERE
+VITE_RAZORPAY_KEY_ID=PASTE_YOUR_RAZORPAY_KEY_ID_HERE
 ```
-> **Note:** This file is included in `.gitignore` and should never be committed to your repository. The `VITE_` prefix for the Razorpay key is required by Vite to expose it to the frontend.
+> **Note:** This file is included in `.gitignore` and should never be committed. The `VITE_` prefix is required by Vite to expose the Razorpay key to the frontend during development.
 
 ### 3. Run the Development Server
 
-Now you can start the application. This single command starts both the frontend Vite server and the backend serverless function proxy.
+This command starts both the frontend Vite server and the backend serverless function proxy.
 
 ```bash
 npm run dev
 ```
 
-Your application should now be running at `http://localhost:8788` (the default port for the development server). Any changes you make to the source code will automatically reload the page.
+Your application should now be running at `http://localhost:8788`.
+
+## Deployment to Cloudflare Pages
+
+This project is configured for easy deployment to Cloudflare Pages.
+
+### 1. Connect Your Repository
+
+In the Cloudflare dashboard, create a new Pages project and connect it to your GitHub repository.
+
+### 2. Configure Build Settings
+
+Use the following build settings:
+- **Framework preset:** `Vite`
+- **Build command:** `npm run build`
+- **Build output directory:** `dist`
+
+### 3. Set Production Environment Variables (CRITICAL)
+
+This is the most important step for a successful deployment. In your Pages project settings (**Settings > Environment variables**), you must add your keys. Cloudflare has two types of variables, and they must be used correctly.
+
+- **`VITE_RAZORPAY_KEY_ID`**:
+  - **Type**: `Plaintext`
+  - **Why**: This key is needed by the Vite build process to be included in the frontend code. Plaintext variables are available at **build time**.
+
+- **`API_KEY`**:
+  - **Type**: `Secret text`
+  - **Why**: The Google Gemini API key is used by your live serverless function. It must be kept secure and is only needed at **runtime**. `Secret text` variables are encrypted and only made available to the running function, not the build process.
+
+**If you set `API_KEY` as `Plaintext`, your live application will fail.**
+
+After setting the variables, re-deploy your project to apply the changes.

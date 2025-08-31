@@ -5,10 +5,10 @@ import ExcelJS from 'exceljs';
 import { AuthUser, FileState, ConversionResult } from '../lib/types';
 import { getPlanDetails } from '../lib/plans';
 import { extractTransactionsFromApi } from '../services/apiService';
-import { FileUploadIcon, CloudUploadIcon, LockIcon, XIcon, CogsIcon } from './Icon';
-import { PasswordModal } from './PasswordModal';
-import { AnalysisView } from './AnalysisView';
-import CliCommandView from './CliCommandView';
+import { FileUploadIcon, CloudUploadIcon, LockIcon, XIcon, CogsIcon } from './Icon.tsx';
+import { PasswordModal } from './PasswordModal.tsx';
+import { AnalysisView } from './AnalysisView.tsx';
+import CliCommandView from './CliCommandView.tsx';
 
 const generateId = () => `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 

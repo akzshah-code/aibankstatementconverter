@@ -118,12 +118,21 @@ const Converter = () => {
             body: formData,
         });
 
-        const responseData = await response.json();
-
         if (!response.ok) {
-            throw new Error(responseData.error || `Request failed with status ${response.status}`);
+            let errorText = `Request failed with status ${response.status}`;
+            try {
+                // Try to parse a JSON error response from the server
+                const errorData = await response.json();
+                errorText = errorData.error || errorText;
+            } catch {
+                // If the response is not JSON, use the raw text
+                const rawError = await response.text();
+                errorText = rawError || errorText;
+            }
+            throw new Error(errorText);
         }
         
+        const responseData = await response.json();
         setResult(responseData);
 
     } catch (err) {

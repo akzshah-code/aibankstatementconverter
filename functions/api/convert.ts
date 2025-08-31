@@ -85,6 +85,9 @@ export default async function handler(request: Request): Promise<Response> {
             throw new ClientError(`File is too large. Please upload a file smaller than ${MAX_FILE_SIZE_MB} MB.`);
         }
 
+        if (!process.env.API_KEY) {
+            throw new Error("Server configuration error: API_KEY is not set.");
+        }
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
         let contentsForApi: any;
@@ -108,12 +111,12 @@ export default async function handler(request: Request): Promise<Response> {
                         throw new ClientError("Incorrect password.");
                     }
                     if (msg.includes('unsupported encryption')) {
-                        throw new Error("Unsupported encryption. Please use an external tool to decrypt the file first.");
+                        throw new Error("Unsupported encryption. This PDF has a strong encryption that cannot be removed automatically. Please use an external tool like QPDF to decrypt the file first, then re-upload.");
                     }
                     if (!password && msg.includes('encrypted')) {
                         throw new ClientError("PDF is encrypted, but no password was provided.");
                     }
-                    throw new Error("Invalid or corrupted PDF.");
+                    throw new Error("This PDF appears to be corrupted or uses an unsupported format. Solution: Open the file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
                 }
             }
             const base64Data = arrayBufferToBase64(arrayBuffer);
@@ -153,9 +156,17 @@ export default async function handler(request: Request): Promise<Response> {
         return new Response(JSON.stringify(transactions), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
     } catch (e: any) {
-        console.error('API Error:', e);
+        console.error('API Error Details:', {
+            message: e.message,
+            name: e.name,
+            status: e.status, // For ClientError
+            stack: e.stack, // Include stack trace for better debugging
+        });
+
         const status = e instanceof ClientError ? e.status : 500;
         const message = e.message || 'An internal server error occurred.';
+        
+        console.error(`Responding to client with status ${status} and message: "${message}"`);
         return new Response(JSON.stringify({ error: message }), { status });
     }
 }
