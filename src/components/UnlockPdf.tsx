@@ -36,7 +36,7 @@ const UnlockPdf = ({ file, onUnlock, onCancel }: UnlockPdfProps) => {
         setError('Incorrect password. Please try again.');
       } else {
         // Provide an actionable solution for unrecoverable errors.
-        setError("Unsupported PDF Format: This PDF is corrupted or uses an unsupported format/encryption. Solution: Please open this file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
+        setError("This PDF appears to be corrupted or uses an unsupported format.<br/><strong class='mt-2 inline-block'>Solution:</strong> Open the file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
         console.error("PDF Unlock Error:", err);
       }
     } finally {

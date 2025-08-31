@@ -70,7 +70,7 @@ const Converter = () => {
       if (err instanceof Error && (err.name === 'PasswordException' || err.message.toLowerCase().includes('password'))) {
         setLockedPdf(selectedFile);
       } else {
-        setError("Unsupported PDF Format: This PDF is corrupted or uses an unsupported format/encryption. Solution: Please open this file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
+        setError("This PDF appears to be corrupted or uses an unsupported format.<br/><strong class='mt-2 inline-block'>Solution:</strong> Open the file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
       }
     } finally {
       setIsCheckingPdf(false);
@@ -266,7 +266,7 @@ const Converter = () => {
             <div className="text-sm mt-2" dangerouslySetInnerHTML={{ __html: error }} />
             <button
               onClick={() => resetState()}
-              className="mt-4 text-sm font-semibold text-red-800 hover:text-red-600 transition-colors"
+              className="mt-4 px-3 py-1.5 border border-red-300 text-sm font-semibold rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors"
             >
               Try Again
             </button>
