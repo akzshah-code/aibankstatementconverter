@@ -100,7 +100,11 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
             return;
         }
 
-        const priceInPaise = parseInt(plan.price.replace(/[^0-9]/g, '')) * 100;
+        const basePrice = parseInt(plan.price.replace(/[^0-9]/g, ''), 10);
+        const priceWithGst = basePrice * 1.18;
+        // Razorpay expects the amount in the smallest currency unit (paise for INR).
+        // Round to avoid floating point inaccuracies before converting to integer.
+        const priceInPaise = Math.round(priceWithGst * 100);
         
         const options = {
             key: razorpayKey,
@@ -188,23 +192,28 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
                 
                 {/* Billing Toggle */}
                 <div className="mt-12 flex justify-center">
-                    <div className="relative flex w-full max-w-xs p-1 bg-gray-200 rounded-full">
-                        <button
-                            onClick={() => setBillingCycle('monthly')}
-                            className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
-                                billingCycle === 'monthly' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
-                            }`}
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            onClick={() => setBillingCycle('annual')}
-                            className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
-                                billingCycle === 'annual' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
-                            }`}
-                        >
-                            Yearly
-                        </button>
+                    <div className="flex items-center gap-x-4">
+                        <div className="relative flex w-full max-w-xs p-1 bg-gray-200 rounded-full">
+                            <button
+                                onClick={() => setBillingCycle('monthly')}
+                                className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
+                                    billingCycle === 'monthly' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
+                                }`}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                onClick={() => setBillingCycle('annual')}
+                                className={`relative flex-1 py-2 text-sm font-semibold rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 ${
+                                    billingCycle === 'annual' ? 'bg-brand-primary text-white shadow' : 'text-brand-gray hover:bg-gray-300'
+                                }`}
+                            >
+                                Yearly
+                            </button>
+                        </div>
+                        <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full hidden sm:inline-block animate-fade-in">
+                            Save 50%
+                        </span>
                     </div>
                 </div>
 
