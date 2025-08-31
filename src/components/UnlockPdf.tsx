@@ -3,7 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 
 interface UnlockPdfProps {
   file: File;
-  onUnlock: (unlockedFile: File) => void;
+  onUnlock: (unlockedFile: File, password?: string) => void;
   onCancel: () => void;
 }
 
@@ -30,14 +30,14 @@ const UnlockPdf = ({ file, onUnlock, onCancel }: UnlockPdfProps) => {
 
       const unlockedFile = new File([pdfBytes as BlobPart], file.name, { type: 'application/pdf' });
 
-      onUnlock(unlockedFile);
+      onUnlock(unlockedFile, password);
     } catch (err) {
-      if (err instanceof Error && err.message.toLowerCase().includes('password')) {
+      if (err instanceof Error && (err.message.toLowerCase().includes('password') || err.name === 'InvalidPasswordError')) {
         setError('Incorrect password. Please try again.');
       } else {
-        // Provide an actionable solution for unrecoverable errors.
-        setError("This PDF appears to be corrupted or uses an unsupported format.<br/><strong class='mt-2 inline-block'>Solution:</strong> Open the file on your computer and use the 'Print to PDF' function to create a new, unlocked copy. Then, upload the new file.");
-        console.error("PDF Unlock Error:", err);
+        // Since server-side handles robust unlocking, just pass it through on client error.
+        console.warn("Client-side unlock failed, passing to server:", err);
+        onUnlock(file, password);
       }
     } finally {
       setIsUnlocking(false);
@@ -86,7 +86,7 @@ const UnlockPdf = ({ file, onUnlock, onCancel }: UnlockPdfProps) => {
               )}
             </button>
           </div>
-          {error && <p id="password-error" className="text-red-600 text-sm mt-1 text-left" dangerouslySetInnerHTML={{ __html: error.replace('Solution:', '<br/><strong class="mt-2 inline-block">Solution:</strong>') }}></p>}
+          {error && <p id="password-error" className="text-red-600 text-sm mt-1 text-left" dangerouslySetInnerHTML={{ __html: error }}></p>}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

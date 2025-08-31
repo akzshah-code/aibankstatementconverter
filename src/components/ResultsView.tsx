@@ -11,11 +11,14 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
   const handleDownload = async (format: 'xlsx' | 'csv' | 'json') => {
     // Re-order and rename columns for export
     const dataForExport = transactions.map(t => ({
-      Date: t.date,
-      Description: t.description,
-      Amount: t.amount,
-      Currency: t.currency,
-      Type: t.type
+      'Transaction Date': t.date,
+      'Value Date': t.valueDate,
+      'Description': t.description,
+      'Reference': t.reference,
+      'Debit': t.debit,
+      'Credit': t.credit,
+      'Balance': t.balance,
+      'Category': t.category,
     }));
 
     if (format === 'json') {
@@ -36,17 +39,17 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
     const worksheet = workbook.addWorksheet("Transactions");
 
     worksheet.columns = [
-      { header: 'Date', key: 'Date', width: 15 },
+      { header: 'Transaction Date', key: 'Transaction Date', width: 15 },
+      { header: 'Value Date', key: 'Value Date', width: 15 },
       { header: 'Description', key: 'Description', width: 50 },
-      { header: 'Amount', key: 'Amount', width: 15 },
-      { header: 'Currency', key: 'Currency', width: 10 },
-      { header: 'Type', key: 'Type', width: 10 },
+      { header: 'Reference', key: 'Reference', width: 20 },
+      { header: 'Debit', key: 'Debit', width: 15, style: { numFmt: '#,##0.00' } },
+      { header: 'Credit', key: 'Credit', width: 15, style: { numFmt: '#,##0.00' } },
+      { header: 'Balance', key: 'Balance', width: 15, style: { numFmt: '#,##0.00' } },
+      { header: 'Category', key: 'Category', width: 20 },
     ];
 
     worksheet.addRows(dataForExport);
-
-    // Apply number formatting to the Amount column to display currency correctly.
-    worksheet.getColumn('Amount').numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
     
     const downloadFile = (blob: Blob, fileName: string) => {
         const url = URL.createObjectURL(blob);
@@ -77,14 +80,15 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
 
       {/* Table Section */}
       <div className="border rounded-lg overflow-hidden mb-6">
-        <div className="overflow-y-auto max-h-72">
+        <div className="overflow-y-auto max-h-96">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th scope="col" className="px-4 py-2 font-medium">Date</th>
                 <th scope="col" className="px-4 py-2 font-medium">Description</th>
-                <th scope="col" className="px-4 py-2 font-medium text-right">Amount</th>
-                <th scope="col" className="px-4 py-2 font-medium">Type</th>
+                <th scope="col" className="px-4 py-2 font-medium text-right">Debit</th>
+                <th scope="col" className="px-4 py-2 font-medium text-right">Credit</th>
+                <th scope="col" className="px-4 py-2 font-medium text-right">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -92,13 +96,14 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="px-4 py-3 whitespace-nowrap">{transaction.date}</td>
                   <td className="px-4 py-3">{transaction.description}</td>
-                  <td className={`px-4 py-3 font-medium text-right whitespace-nowrap ${transaction.type === 'Credit' ? 'text-green-600' : 'text-red-600'}`}>
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: transaction.currency }).format(transaction.amount)}
+                  <td className="px-4 py-3 font-medium text-right whitespace-nowrap text-red-600">
+                    {transaction.debit ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(transaction.debit) : '-'}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${transaction.type === 'Credit' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {transaction.type}
-                    </span>
+                   <td className="px-4 py-3 font-medium text-right whitespace-nowrap text-green-600">
+                    {transaction.credit ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(transaction.credit) : '-'}
+                  </td>
+                  <td className="px-4 py-3 font-medium text-right whitespace-nowrap">
+                    {transaction.balance != null ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(transaction.balance) : '-'}
                   </td>
                 </tr>
               ))}
@@ -109,7 +114,7 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
       
       {/* Download Section */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-brand-dark mb-4">Download Your Combined Data</h3>
+        <h3 className="text-lg font-semibold text-brand-dark mb-4">Download Your Data</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <button onClick={() => handleDownload('xlsx')} className="flex items-center justify-center w-full bg-brand-blue text-white px-4 py-3 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -134,7 +139,7 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
           onClick={onReset}
           className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300 transition-colors duration-200"
         >
-          Start Your Own Conversion
+          Convert Another File
         </button>
       </div>
     </div>

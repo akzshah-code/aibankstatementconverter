@@ -39,8 +39,11 @@ export interface EmailRoute {
 
 export interface ExtractedTransaction {
   date: string;
+  valueDate: string;
   description: string;
-  amount: number;
-  currency: string;
-  type: 'Credit' | 'Debit';
+  reference: string | null;
+  debit: number | null;
+  credit: number | null;
+  balance: number;
+  category: string;
 }
