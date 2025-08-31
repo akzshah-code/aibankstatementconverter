@@ -80,7 +80,7 @@ const PrivacyPolicy = () => {
             
             <SectionTitle>8. Contact Us</SectionTitle>
             <Paragraph>
-              If you have any questions about this Privacy Policy, please contact us.
+              If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@bankconverts.com" className="text-brand-blue hover:underline">support@bankconverts.com</a>.
             </Paragraph>
           </div>
         </div>

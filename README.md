@@ -27,7 +27,7 @@ This command will read the `package.json` file and install all the necessary lib
 
 ### 2. Set Up Environment Variables
 
-The application requires your Google AI API key to function. We'll use a local environment file to manage this securely.
+The application requires API keys for Google AI and Razorpay to function. We'll use a local environment file to manage these securely.
 
 a. **Create a local `.dev.vars` file:**
 In your project's root directory, create a copy of the example file `.dev.vars.example`. Rename the copy to `.dev.vars`.
@@ -36,14 +36,15 @@ In your project's root directory, create a copy of the example file `.dev.vars.e
 cp .dev.vars.example .dev.vars
 ```
 
-b. **Add your API key:**
-Open the newly created `.dev.vars` file and replace the placeholder text with your actual Google Gemini API key.
+b. **Add your API keys:**
+Open the newly created `.dev.vars` file and replace the placeholder text with your actual Google Gemini API key and your Razorpay Key ID.
 
 ```
 # .dev.vars
 API_KEY="PASTE_YOUR_GOOGLE_GEMINI_API_KEY_HERE"
+VITE_RAZORPAY_KEY_ID="PASTE_YOUR_RAZORPAY_KEY_ID_HERE"
 ```
-> **Note:** This file is included in `.gitignore` and should never be committed to your repository.
+> **Note:** This file is included in `.gitignore` and should never be committed to your repository. The `VITE_` prefix for the Razorpay key is required by Vite to expose it to the frontend.
 
 ### 3. Run the Development Server
 

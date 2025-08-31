@@ -47,7 +47,7 @@ const Contact = () => {
               <div className="mb-6 text-center">
                 <h3 className="text-lg font-semibold text-brand-dark">Contact Information</h3>
                 <p className="text-brand-gray">
-                    Email us at: <a href="mailto:contact@bankconverts.com" className="text-brand-blue hover:underline">contact@bankconverts.com</a>
+                    Email us at: <a href="mailto:support@bankconverts.com" className="text-brand-blue hover:underline">support@bankconverts.com</a>
                 </p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-6">

@@ -90,10 +90,20 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
             return;
         }
 
+        // Fetch the key from Vite's environment variables.
+        // VITE_RAZORPAY_KEY_ID must be set in your .env file (e.g., .dev.vars for Cloudflare).
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+        if (!razorpayKey) {
+            console.error("VITE_RAZORPAY_KEY_ID is not set in environment variables.");
+            alert("Payment processing is not configured correctly. Please contact support.");
+            return;
+        }
+
         const priceInPaise = parseInt(plan.price.replace(/[^0-9]/g, '')) * 100;
         
         const options = {
-            key: 'rzp_test_YOUR_KEY_HERE', // IMPORTANT: Replace with your actual Razorpay Key ID
+            key: razorpayKey,
             amount: priceInPaise,
             currency: 'INR',
             name: 'BankConverts',

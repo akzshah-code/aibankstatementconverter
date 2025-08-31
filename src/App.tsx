@@ -1,3 +1,4 @@
+
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { User, BlogPost, EmailTemplate, EmailRoute } from './lib/types';
 import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
@@ -14,9 +15,10 @@ const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
-const PrivacyPolicyPage = lazy(() => import('./pages/Privacy.tsx'));
-const AboutPage = lazy(() => import('./pages/AboutPage.tsx'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+// FIX: Lazily import PrivacyPolicyPage to make it available for routing.
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 
 
 const LoadingFallback = () => (

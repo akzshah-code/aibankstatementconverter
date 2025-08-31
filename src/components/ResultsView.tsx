@@ -1,4 +1,5 @@
 import { ExtractedTransaction } from '../lib/types';
+import ExcelJS from 'exceljs';
 
 interface ResultsViewProps {
   transactions: ExtractedTransaction[];
@@ -7,20 +8,6 @@ interface ResultsViewProps {
 
 const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
 
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-  };
-  
   const handleDownload = async (format: 'xlsx' | 'csv' | 'json') => {
     // Re-order and rename columns for export
     const dataForExport = transactions.map(t => ({
@@ -32,39 +19,54 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
     }));
 
     if (format === 'json') {
-      const json = JSON.stringify(transactions, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      downloadBlob(blob, 'transactions.json');
+      const jsonStr = JSON.stringify(transactions, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'transactions.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       return;
     }
-
-    // Dynamically import exceljs only when needed for Excel/CSV export
-    const ExcelJS = (await import('exceljs')).default;
-
+    
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Transactions');
+    const worksheet = workbook.addWorksheet("Transactions");
 
     worksheet.columns = [
       { header: 'Date', key: 'Date', width: 15 },
       { header: 'Description', key: 'Description', width: 50 },
-      { header: 'Amount', key: 'Amount', width: 15, style: { numFmt: '#,##0.00' } },
+      { header: 'Amount', key: 'Amount', width: 15 },
       { header: 'Currency', key: 'Currency', width: 10 },
       { header: 'Type', key: 'Type', width: 10 },
     ];
-    
+
     worksheet.addRows(dataForExport);
 
-    // Style header row
-    worksheet.getRow(1).font = { bold: true };
+    // Apply number formatting to the Amount column to display currency correctly.
+    worksheet.getColumn('Amount').numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
     
+    const downloadFile = (blob: Blob, fileName: string) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     if (format === 'xlsx') {
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      downloadBlob(blob, 'transactions.xlsx');
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        downloadFile(blob, 'transactions.xlsx');
     } else if (format === 'csv') {
-      const buffer = await workbook.csv.writeBuffer();
-      const blob = new Blob([buffer], { type: 'text/csv;charset=utf-8;' });
-      downloadBlob(blob, 'transactions.csv');
+        const buffer = await workbook.csv.writeBuffer();
+        const blob = new Blob([buffer], { type: 'text/csv;charset=utf-8;' });
+        downloadFile(blob, 'transactions.csv');
     }
   };
   

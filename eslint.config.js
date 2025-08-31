@@ -1,54 +1,41 @@
-// eslint.config.js
-import globals from "globals";
-import tseslint from "typescript-eslint";
-import reactPlugin from "eslint-plugin-react";
-import hooksPlugin from "eslint-plugin-react-hooks";
-import refreshPlugin from "eslint-plugin-react-refresh";
-
-export default [
-  // Global ignores
-  {
-    ignores: ["dist/", "node_modules/", "functions/", "*.js", "*.cjs", "*.mjs"],
+{
+  "name": "bank-converts-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler pages dev --proxy 5174 -- npm run dev:vite",
+    "dev:vite": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,html}\""
   },
-  
-  // Base TypeScript configuration
-  ...tseslint.configs.recommended,
-  
-  // React-specific configuration
-  {
-    files: ["src/**/*.{ts,tsx}"],
-    plugins: {
-      react: reactPlugin,
-      "react-hooks": hooksPlugin,
-      "react-refresh": refreshPlugin,
-    },
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
-      globals: {
-        ...globals.browser,
-      },
-    },
-    rules: {
-      // Recommended rules from plugins
-      ...reactPlugin.configs.recommended.rules,
-      ...reactPlugin.configs["jsx-runtime"].rules,
-      ...hooksPlugin.configs.recommended.rules,
-      
-      // Customizations and overrides
-      "react/react-in-jsx-scope": "off", // Not needed with modern React
-      "react/prop-types": "off", // Not needed with TypeScript
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
-      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    },
-    settings: {
-      react: {
-        version: "detect", // Automatically detect React version
-      },
-    },
+  "dependencies": {
+    "@google/genai": "^1.16.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.5.136",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xlsx": "^0.20.2"
   },
-];
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "^1.0.0-alpha.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "postcss": "^8.4.39",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
+  }
+}

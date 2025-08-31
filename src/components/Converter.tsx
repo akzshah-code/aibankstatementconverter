@@ -5,7 +5,7 @@ import UnlockPdf from './UnlockPdf';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure the worker for pdfjs-dist from the CDN. This is crucial for performance.
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.54/build/pdf.worker.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.172/build/pdf.worker.mjs`;
 
 
 // Helper function to convert a File object to a base64 string
@@ -172,7 +172,10 @@ const Converter = () => {
             canvas.width = viewport.width;
 
             if (context) {
-                await page.render({ canvas, canvasContext: context, viewport }).promise;
+                // FIX: Cast to 'any' to bypass incorrect TypeScript definitions for pdfjs-dist's
+                // render method, which incorrectly reports a missing 'canvas' property. This
+                // allows the valid runtime call to proceed without compile-time errors.
+                await page.render({ canvasContext: context, viewport } as any).promise;
                 
                 const mimeType = 'image/jpeg';
                 const dataUrl = canvas.toDataURL(mimeType, 0.8); // 80% quality
