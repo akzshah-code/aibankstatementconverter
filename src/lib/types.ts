@@ -1,3 +1,6 @@
+
+
+// FIX: Removed a circular import that was causing a conflict with the local declaration.
 export interface User {
   id: string;
   name: string;
@@ -8,6 +11,10 @@ export interface User {
     used: number;
     total: number;
   };
+  dailyUsage: {
+    pagesUsed: number;
+    resetTimestamp: number;
+  };
   planRenews: string;
 }
 
@@ -17,8 +24,8 @@ export interface BlogPost {
   author: string;
   date: string;
   excerpt: string;
-  content: string; // Full content for the blog post page
-  featuredImage?: string; // Store the name or path of the image
+  content: string; 
+  featuredImage?: string; 
 }
 
 export interface EmailTemplate {
@@ -47,3 +54,28 @@ export interface ExtractedTransaction {
   balance: number;
   category: string;
 }
+
+// --- New Types for Bulk Upload Feature ---
+
+export interface FileState {
+    id: string;
+    file: File;
+    status: 'queued' | 'processing' | 'success' | 'error' | 'locked';
+    progress: number;
+    transactions: ExtractedTransaction[];
+    error: string | null;
+    pages: number;
+    password: string | null;
+}
+
+export interface ConversionResult {
+    transactions: number;
+    pages: number;
+    fileCount: number;
+    successfulFiles: number;
+    processingTime: number;
+}
+
+// AuthUser is a simplified version of the main User type for prop drilling.
+// Let's use the main User type and ensure it has all required properties.
+export type AuthUser = User;

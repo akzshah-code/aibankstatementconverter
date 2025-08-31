@@ -1,6 +1,6 @@
 
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { User, BlogPost, EmailTemplate, EmailRoute } from './lib/types';
+import { User, BlogPost, EmailTemplate, EmailRoute, ConversionResult } from './lib/types';
 import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
 import { getPlanDetails } from './lib/plans';
 
@@ -17,8 +17,8 @@ const FaqPage = lazy(() => import('./pages/FaqPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-// FIX: Lazily import PrivacyPolicyPage to make it available for routing.
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const BulkConvertPage = lazy(() => import('./pages/BulkConvertPage'));
 
 
 const LoadingFallback = () => (
@@ -43,7 +43,6 @@ function App() {
     }
   });
   
-  // FIX: Persist the master list of all users to localStorage to prevent data loss on refresh.
   const [allUsers, setAllUsers] = useState<User[]>(() => {
     try {
       const savedUsers = localStorage.getItem('allUsers');
@@ -102,8 +101,6 @@ function App() {
       setUser(foundUser);
       window.location.hash = foundUser.role === 'admin' ? '#admin' : '#dashboard';
     } else {
-      // Fallback for demo purposes: if user doesn't exist, create a new free user.
-      // The primary path for new users is the registration flow.
       const freePlanDetails = getPlanDetails('Free');
       const standardUser: User = {
         id: `usr_${Date.now()}`,
@@ -112,6 +109,7 @@ function App() {
         role: 'user',
         plan: 'Free',
         usage: { used: 0, total: freePlanDetails.pages },
+        dailyUsage: { pagesUsed: 0, resetTimestamp: 0 },
         planRenews: 'N/A',
       };
       setUser(standardUser);
@@ -136,15 +134,14 @@ function App() {
       role: 'user',
       plan: planName,
       usage: { used: 0, total: planDetails.pages },
-      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now', // Placeholder
+      dailyUsage: { pagesUsed: 0, resetTimestamp: 0 },
+      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now',
     };
 
     setAllUsers(prev => [...prev, newUser]);
     setUser(newUser);
     
-    // If it's a paid plan, redirect to pricing to trigger payment. Otherwise, go to dashboard.
     if (planName !== 'Free') {
-       // FIX: Redirect to pricing page with params to auto-trigger the payment modal.
        window.location.hash = `#pricing?autoPay=true&plan=${planName}&cycle=${billingCycle}`;
     } else {
        window.location.hash = '#dashboard';
@@ -168,7 +165,7 @@ function App() {
       ...user,
       plan: planName,
       usage: { used: 0, total: planDetails.pages },
-      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now', // Placeholder
+      planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now',
     };
 
     setUser(updatedUser);
@@ -177,9 +174,38 @@ function App() {
     alert(`Upgrade successful! You are now on the ${planName} plan.`);
     window.location.hash = '#dashboard';
   };
+  
+  const handleConversionComplete = (result: ConversionResult) => {
+    if (!user || result.pages === 0) return;
+  
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+  
+    // Initialize or reset daily usage if the timestamp has passed
+    let currentDailyUsage = user.dailyUsage || { pagesUsed: 0, resetTimestamp: 0 };
+    if (now > currentDailyUsage.resetTimestamp) {
+      currentDailyUsage = { pagesUsed: 0, resetTimestamp: now + twentyFourHours };
+    }
+  
+    // Update user state
+    const updatedUser: User = {
+      ...user,
+      usage: {
+        ...user.usage,
+        used: (user.usage.used || 0) + result.pages,
+      },
+      dailyUsage: {
+        pagesUsed: currentDailyUsage.pagesUsed + result.pages,
+        resetTimestamp: currentDailyUsage.resetTimestamp,
+      },
+    };
+  
+    setUser(updatedUser);
+    setAllUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+  };
 
   const renderPage = () => {
-    if (!user && (route.startsWith('#dashboard') || route.startsWith('#admin'))) {
+    if (!user && (route.startsWith('#dashboard') || route.startsWith('#admin') || route.startsWith('#bulk-convert'))) {
       return <LoginPage onLogin={handleLogin} />;
     }
 
@@ -192,7 +218,6 @@ function App() {
       return <BlogPostPage posts={allPosts} postId={postId} user={user} onLogout={handleLogout} />;
     }
 
-    // Use startsWith to handle query parameters in the hash
     const currentRoute = route.split('?')[0];
 
     switch (currentRoute) {
@@ -214,6 +239,8 @@ function App() {
         return <RegisterPage onRegister={handleRegister} />;
       case '#dashboard':
         return <DashboardPage user={user} onLogout={handleLogout} />;
+      case '#bulk-convert':
+        return <BulkConvertPage user={user} onLogout={handleLogout} onConversionComplete={handleConversionComplete} />;
       case '#blog':
         return <BlogPage posts={allPosts} user={user} onLogout={handleLogout} />;
       case '#admin':

@@ -8,6 +8,8 @@ export const users: User[] = [
     role: 'admin',
     plan: 'Free',
     usage: { used: 0, total: 5 },
+    // FIX: Added the required 'dailyUsage' property.
+    dailyUsage: { pagesUsed: 0, resetTimestamp: 0 },
     planRenews: '9/23/2025',
   },
   {
@@ -17,6 +19,8 @@ export const users: User[] = [
     role: 'user',
     plan: 'Professional',
     usage: { used: 450, total: 1000 },
+    // FIX: Added the required 'dailyUsage' property.
+    dailyUsage: { pagesUsed: 0, resetTimestamp: 0 },
     planRenews: '10/15/2024',
   },
     {
@@ -26,6 +30,8 @@ export const users: User[] = [
     role: 'user',
     plan: 'Starter',
     usage: { used: 120, total: 400 },
+    // FIX: Added the required 'dailyUsage' property.
+    dailyUsage: { pagesUsed: 0, resetTimestamp: 0 },
     planRenews: '10/22/2024',
   },
 ];
