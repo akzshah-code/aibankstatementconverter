@@ -1,25 +1,45 @@
-import { ExtractedTransaction } from '../lib/types';
+
+import { useEffect } from 'react';
+import { ExtractedTransaction, ConversionResult } from '../lib/types';
 import ExcelJS from 'exceljs';
 
 interface ResultsViewProps {
   transactions: ExtractedTransaction[];
   onReset: () => void;
+  onConversionComplete: (result: ConversionResult) => void;
 }
 
-const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
+const ResultsView = ({ transactions, onReset, onConversionComplete }: ResultsViewProps) => {
+
+  // When the component mounts with results, report the page usage.
+  // Using an empty dependency array `[]` ensures this effect runs only once
+  // after the initial render with the transactions, preventing duplicate calls.
+  useEffect(() => {
+    const pages = Math.ceil(transactions.length / 25) || 1;
+    const result: ConversionResult = {
+      transactions: transactions.length,
+      pages: pages,
+      fileCount: 1,
+      successfulFiles: 1,
+      processingTime: 0, // Not tracked for single conversions, but required by type.
+    };
+    onConversionComplete(result);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDownload = async (format: 'xlsx' | 'csv' | 'json') => {
     // Re-order and rename columns for export
     const dataForExport = transactions.map(t => ({
       'Transaction Date': t.date,
-      'Value Date': t.valueDate,
       'Description': t.description,
       'Reference': t.reference,
+      'Value Date': t.valueDate,
       'Debit': t.debit,
       'Credit': t.credit,
       'Balance': t.balance,
       'Category': t.category,
     }));
+    
+    const safeFileName = `Bankconverts ${new Date().toISOString().slice(0, 10)}`;
 
     if (format === 'json') {
       const jsonStr = JSON.stringify(transactions, null, 2);
@@ -27,7 +47,7 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'transactions.json';
+      link.download = `${safeFileName}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -40,9 +60,9 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
 
     worksheet.columns = [
       { header: 'Transaction Date', key: 'Transaction Date', width: 15 },
-      { header: 'Value Date', key: 'Value Date', width: 15 },
       { header: 'Description', key: 'Description', width: 50 },
       { header: 'Reference', key: 'Reference', width: 20 },
+      { header: 'Value Date', key: 'Value Date', width: 15 },
       { header: 'Debit', key: 'Debit', width: 15, style: { numFmt: '#,##0.00' } },
       { header: 'Credit', key: 'Credit', width: 15, style: { numFmt: '#,##0.00' } },
       { header: 'Balance', key: 'Balance', width: 15, style: { numFmt: '#,##0.00' } },
@@ -65,11 +85,11 @@ const ResultsView = ({ transactions, onReset }: ResultsViewProps) => {
     if (format === 'xlsx') {
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        downloadFile(blob, 'transactions.xlsx');
+        downloadFile(blob, `${safeFileName}.xlsx`);
     } else if (format === 'csv') {
         const buffer = await workbook.csv.writeBuffer();
         const blob = new Blob([buffer], { type: 'text/csv;charset=utf-8;' });
-        downloadFile(blob, 'transactions.csv');
+        downloadFile(blob, `${safeFileName}.csv`);
     }
   };
   

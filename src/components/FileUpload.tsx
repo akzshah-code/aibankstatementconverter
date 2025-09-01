@@ -229,13 +229,13 @@ export const FileUpload = ({ user, onConversionComplete }: { user: AuthUser | nu
     const handleDownloadCombined = async (format: 'xlsx' | 'csv' | 'json') => {
         const allTransactions = files.flatMap(f => f.status === 'success' ? f.transactions : []);
         if (allTransactions.length === 0) return;
-        const safeFileName = `BankDataBot_Export_${new Date().toISOString().slice(0, 10)}`;
+        const safeFileName = `Bankconverts ${new Date().toISOString().slice(0, 10)}`;
 
         const dataForExport = allTransactions.map(t => ({
             'Transaction Date': t.date,
-            'Value Date': t.valueDate,
             'Description': t.description,
             'Reference': t.reference,
+            'Value Date': t.valueDate,
             'Debit': t.debit,
             'Credit': t.credit,
             'Balance': t.balance,
@@ -257,9 +257,9 @@ export const FileUpload = ({ user, onConversionComplete }: { user: AuthUser | nu
         const worksheet = workbook.addWorksheet("Combined Transactions");
         worksheet.columns = [
             { header: 'Transaction Date', key: 'Transaction Date', width: 15 },
-            { header: 'Value Date', key: 'Value Date', width: 15 },
             { header: 'Description', key: 'Description', width: 50 },
             { header: 'Reference', key: 'Reference', width: 20 },
+            { header: 'Value Date', key: 'Value Date', width: 15 },
             { header: 'Debit', key: 'Debit', width: 15, style: { numFmt: '#,##0.00' } },
             { header: 'Credit', key: 'Credit', width: 15, style: { numFmt: '#,##0.00' } },
             { header: 'Balance', key: 'Balance', width: 15, style: { numFmt: '#,##0.00' } },
@@ -368,7 +368,7 @@ export const FileUpload = ({ user, onConversionComplete }: { user: AuthUser | nu
                                     <button className="bg-brand-blue text-white px-6 py-3 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200 disabled:bg-brand-blue/60 disabled:cursor-not-allowed flex items-center justify-center min-w-[200px]" onClick={handleConvertAll} disabled={!canConvert && !hasLockedFiles}>
                                         {isProcessingBatch ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="http://www.w3.org/2000/svg"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="http://www.w3.org/2000/svg"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                                 {`Processing ${processingFileIndex} of ${queuedFilesCount}...`}
                                             </>
                                         ) : (

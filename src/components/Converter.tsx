@@ -1,10 +1,15 @@
 
+
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
-import { ExtractedTransaction } from '../lib/types';
+import { ExtractedTransaction, ConversionResult } from '../lib/types';
 import ResultsView from './ResultsView';
 import UnlockPdf from './UnlockPdf';
 
-const Converter = () => {
+interface ConverterProps {
+  onConversionComplete: (result: ConversionResult) => void;
+}
+
+const Converter = ({ onConversionComplete }: ConverterProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [lockedPdf, setLockedPdf] = useState<File | null>(null);
@@ -152,7 +157,7 @@ const Converter = () => {
   if (result) {
     return (
       <div className="bg-white rounded-lg shadow-2xl p-8 max-w-4xl mx-auto w-full">
-        <ResultsView transactions={result} onReset={resetState} />
+        <ResultsView transactions={result} onReset={resetState} onConversionComplete={onConversionComplete} />
       </div>
     );
   }

@@ -1,8 +1,14 @@
+
 import { useState } from 'react';
 import Converter from './Converter';
 import DemoView from './DemoView';
+import { ConversionResult } from '../lib/types';
 
-const Hero = () => {
+interface HeroProps {
+  onConversionComplete: (result: ConversionResult) => void;
+}
+
+const Hero = ({ onConversionComplete }: HeroProps) => {
   const [showDemo, setShowDemo] = useState(false);
 
   return (
@@ -28,7 +34,7 @@ const Hero = () => {
             </a>
           </div>
           <div>
-            {showDemo ? <DemoView onExitDemo={() => setShowDemo(false)} /> : <Converter />}
+            {showDemo ? <DemoView onExitDemo={() => setShowDemo(false)} /> : <Converter onConversionComplete={onConversionComplete} />}
           </div>
         </div>
       </div>

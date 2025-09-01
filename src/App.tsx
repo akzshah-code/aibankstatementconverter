@@ -1,5 +1,6 @@
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { User, BlogPost, EmailTemplate, EmailRoute, ConversionResult } from './lib/types';
 import { users as initialUsers, blogPosts as initialBlogPosts, emailTemplates as initialEmailTemplates, emailRoutes as initialEmailRoutes } from './lib/mock-data';
 import { getPlanDetails } from './lib/plans';
@@ -175,34 +176,36 @@ function App() {
     window.location.hash = '#dashboard';
   };
   
-  const handleConversionComplete = (result: ConversionResult) => {
-    if (!user || result.pages === 0) return;
+  const handleConversionComplete = useCallback((result: ConversionResult) => {
+    // Use a functional update for setUser to get the latest user state,
+    // avoiding stale closures and issues if multiple conversions happen quickly.
+    setUser(currentUser => {
+        if (!currentUser || result.pages === 0) return currentUser;
+
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
   
-    const now = Date.now();
-    const twentyFourHours = 24 * 60 * 60 * 1000;
-  
-    // Initialize or reset daily usage if the timestamp has passed
-    let currentDailyUsage = user.dailyUsage || { pagesUsed: 0, resetTimestamp: 0 };
-    if (now > currentDailyUsage.resetTimestamp) {
-      currentDailyUsage = { pagesUsed: 0, resetTimestamp: now + twentyFourHours };
-    }
-  
-    // Update user state
-    const updatedUser: User = {
-      ...user,
-      usage: {
-        ...user.usage,
-        used: (user.usage.used || 0) + result.pages,
-      },
-      dailyUsage: {
-        pagesUsed: currentDailyUsage.pagesUsed + result.pages,
-        resetTimestamp: currentDailyUsage.resetTimestamp,
-      },
-    };
-  
-    setUser(updatedUser);
-    setAllUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
-  };
+        let currentDailyUsage = currentUser.dailyUsage || { pagesUsed: 0, resetTimestamp: 0 };
+        if (now > currentDailyUsage.resetTimestamp) {
+            currentDailyUsage = { pagesUsed: 0, resetTimestamp: now + twentyFourHours };
+        }
+
+        const updatedUser: User = {
+            ...currentUser,
+            usage: {
+                ...currentUser.usage,
+                used: (currentUser.usage.used || 0) + result.pages,
+            },
+            dailyUsage: {
+                pagesUsed: currentDailyUsage.pagesUsed + result.pages,
+                resetTimestamp: currentDailyUsage.resetTimestamp,
+            },
+        };
+
+        setAllUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));
+        return updatedUser;
+    });
+  }, [setAllUsers]); // Only depends on the stable setter function.
 
   const renderPage = () => {
     if (!user && (route.startsWith('#dashboard') || route.startsWith('#admin') || route.startsWith('#bulk-convert'))) {
@@ -259,7 +262,7 @@ function App() {
           />
         );
       default:
-        return <LandingPage user={user} onLogout={handleLogout} />;
+        return <LandingPage user={user} onLogout={handleLogout} onConversionComplete={handleConversionComplete} />;
     }
   };
 
