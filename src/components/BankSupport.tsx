@@ -9,7 +9,7 @@ const BankSupport = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-3xl font-bold text-brand-dark mb-4">Built for Indian Banks</h2>
         <p className="text-brand-gray mb-12 max-w-2xl mx-auto">

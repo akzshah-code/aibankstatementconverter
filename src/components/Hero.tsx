@@ -8,7 +8,7 @@ interface HeroProps {
 
 const Hero = ({ onConversionComplete }: HeroProps) => {
   return (
-    <section id="convert" className="py-20 md:py-28 bg-gray-50">
+    <section id="convert" className="py-12 md:py-16 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-brand-dark leading-tight mb-4">
