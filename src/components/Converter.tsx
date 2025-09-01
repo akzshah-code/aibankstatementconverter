@@ -1,3 +1,4 @@
+
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { ExtractedTransaction } from '../lib/types';
 import ResultsView from './ResultsView';
@@ -120,14 +121,14 @@ const Converter = () => {
 
         if (!response.ok) {
             let errorText = `Request failed with status ${response.status}`;
+            const responseBody = await response.text();
             try {
                 // Try to parse a JSON error response from the server
-                const errorData = await response.json();
+                const errorData = JSON.parse(responseBody);
                 errorText = errorData.error || errorText;
             } catch {
                 // If the response is not JSON, use the raw text
-                const rawError = await response.text();
-                errorText = rawError || errorText;
+                errorText = responseBody || errorText;
             }
             throw new Error(errorText);
         }

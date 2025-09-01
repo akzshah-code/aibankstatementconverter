@@ -1,3 +1,4 @@
+
 import { ExtractedTransaction } from "../lib/types";
 
 export const extractTransactionsFromApi = async (file: File, password: string | null): Promise<ExtractedTransaction[]> => {
@@ -14,12 +15,12 @@ export const extractTransactionsFromApi = async (file: File, password: string | 
 
     if (!response.ok) {
         let errorText = `Request failed with status ${response.status}`;
+        const responseBody = await response.text();
         try {
-            const errorData = await response.json();
+            const errorData = JSON.parse(responseBody);
             errorText = errorData.error || errorText;
         } catch {
-            const rawError = await response.text();
-            errorText = rawError || errorText;
+            errorText = responseBody || errorText;
         }
         throw new Error(errorText);
     }
