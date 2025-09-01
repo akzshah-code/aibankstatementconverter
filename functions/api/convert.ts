@@ -66,12 +66,11 @@ You are an efficient data extraction engine. Convert raw bank statement text int
 7.  **Empty Files:** If no transactions are found, return an empty JSON array: [].
 `;
 
-// This is the serverless function handler.
-export default async function handler(request: Request): Promise<Response> {
-    if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'Allow': 'POST' } });
-    }
-
+// This is the serverless function handler, updated to use the idiomatic
+// Cloudflare Pages `onRequestPost` method. This ensures the function only
+// responds to POST requests, automatically handling other methods with a 405 error.
+// It also correctly accesses environment variables via the `env` object from the context.
+export const onRequestPost = async ({ request, env }) => {
     try {
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
@@ -85,10 +84,10 @@ export default async function handler(request: Request): Promise<Response> {
             throw new ClientError(`File is too large. Please upload a file smaller than ${MAX_FILE_SIZE_MB} MB.`);
         }
 
-        if (!process.env.API_KEY) {
+        if (!env.API_KEY) {
             throw new Error("Server configuration error: API_KEY is not set.");
         }
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const ai = new GoogleGenAI({ apiKey: env.API_KEY });
 
         let contentsForApi: any;
         let systemInstruction: string;
