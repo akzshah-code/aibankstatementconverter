@@ -1,4 +1,5 @@
-import React from 'react';
+
+import type { Dispatch, SetStateAction } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AdminDashboard from '../components/AdminDashboard';
@@ -11,10 +12,10 @@ interface AdminPageProps {
   posts: BlogPost[];
   templates: EmailTemplate[];
   routes: EmailRoute[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-  setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
-  setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
-  setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
+  setUsers: Dispatch<SetStateAction<User[]>>;
+  setPosts: Dispatch<SetStateAction<BlogPost[]>>;
+  setTemplates: Dispatch<SetStateAction<EmailTemplate[]>>;
+  setRoutes: Dispatch<SetStateAction<EmailRoute[]>>;
 }
 
 const AdminPage = ({ user, onLogout, users, posts, templates, routes, setUsers, setPosts, setTemplates, setRoutes }: AdminPageProps) => {

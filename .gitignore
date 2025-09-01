@@ -1,49 +1,29 @@
-# 🔒 Secrets and environment variables
-.dev.vars
-.env*
-!.env.example
-*.local
-
-# 📦 Node modules and lock files
+# Node dependencies
 node_modules/
-# package-lock.json was removed from here as per previous suggestion
 
-# 🧪 Logs and debug output
+# Vite build output
+dist/
+
+# Cloudflare Functions temporary directory
+.wrangler/
+
+# Local environment variables - DO NOT COMMIT THIS FILE
+.dev.vars
+
+# IDE and editor directories
+.idea/
+.vscode/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Log files
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# 🛠️ Build artifacts
-dist/
-dist-ssr/
-build/
-.cache/
-.wrangler/
-
-# 🧠 IDE/editor configs
-.vscode/
-.idea/
-*.sublime-workspace
-*.sublime-project
-
-# 🖼️ OS-specific files
-.DS_Store
-Thumbs.db
-ehthumbs.db
-
-# 📁 Misc
-*.xlsx
-*.csv
-*.pdf
-*.bak
-*.tmp
-
-# 🔍 Test snapshots and coverage
+# Test reports
 coverage/
-*.snap
-
-# 🔄 System files
-*.swp
-*.lock
-*.pid

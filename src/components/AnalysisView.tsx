@@ -1,27 +1,20 @@
-
 import { ConversionResult } from '../lib/types';
+import { StatCard } from './shared/StatCard';
 
 interface AnalysisViewProps {
     batchResult: ConversionResult;
     onDownload: (format: 'xlsx' | 'csv' | 'json') => void;
 }
 
-const StatCard = ({ title, value }: { title: string, value: string | number }) => (
-    <div className="bg-white p-4 rounded-lg shadow-sm flex-grow text-center border border-gray-100">
-        <p className="text-sm text-brand-gray">{title}</p>
-        <p className="text-2xl font-bold text-brand-blue">{value}</p>
-    </div>
-);
-
 export const AnalysisView = ({ batchResult, onDownload }: AnalysisViewProps) => {
     return (
         <div className="w-full p-6 bg-brand-blue-light border border-brand-blue/20 rounded-lg mb-6 animate-fade-in">
             <h2 className="text-2xl font-bold text-brand-dark mb-4 text-center">Batch Complete!</h2>
             <div className="flex flex-wrap justify-center items-stretch gap-4 mb-6">
-                <StatCard title="Files Processed" value={batchResult.fileCount} />
-                <StatCard title="Successful" value={batchResult.successfulFiles} />
-                <StatCard title="Transactions" value={batchResult.transactions.toLocaleString()} />
-                <StatCard title="Pages Used" value={batchResult.pages} />
+                <StatCard title="Files Processed" value={batchResult.fileCount} align="center" />
+                <StatCard title="Successful" value={batchResult.successfulFiles} align="center" />
+                <StatCard title="Transactions" value={batchResult.transactions.toLocaleString()} align="center" />
+                <StatCard title="Pages Used" value={batchResult.pages} align="center" />
             </div>
             <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-brand-dark mb-4 text-center">Download Combined Data</h3>

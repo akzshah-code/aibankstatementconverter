@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+
+import { useState, Dispatch, SetStateAction } from 'react';
 import { EmailTemplate } from '../../lib/types';
 import EditEmailModal from './EditEmailModal';
 import AddEmailModal from './AddEmailModal';
 
 interface EmailAutomationsProps {
     templates: EmailTemplate[];
-    setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
+    setTemplates: Dispatch<SetStateAction<EmailTemplate[]>>;
 }
 
 const EmailAutomations = ({ templates, setTemplates }: EmailAutomationsProps) => {

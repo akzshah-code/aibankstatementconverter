@@ -1,6 +1,7 @@
-import React from 'react';
 
-const ValueCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
+import type { FC, ReactNode } from 'react';
+
+const ValueCard: FC<{ icon: ReactNode; title: string; children: ReactNode }> = ({ icon, title, children }) => (
     <div className="bg-gray-50 p-6 rounded-lg border border-gray-100">
         <div className="flex items-center space-x-4 mb-3">
             <div className="bg-brand-blue-light p-3 rounded-full text-brand-blue">

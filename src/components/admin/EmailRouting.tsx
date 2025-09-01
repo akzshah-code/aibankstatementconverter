@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+
+import { useState, Dispatch, SetStateAction } from 'react';
 import { EmailRoute } from '../../lib/types';
 import ToggleSwitch from '../ToggleSwitch';
 
 interface EmailRoutingProps {
   routes: EmailRoute[];
-  setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
+  setRoutes: Dispatch<SetStateAction<EmailRoute[]>>;
 }
 
 const EmailRouting = ({ routes, setRoutes }: EmailRoutingProps) => {
@@ -81,7 +82,7 @@ const EmailRouting = ({ routes, setRoutes }: EmailRoutingProps) => {
                          <select className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md focus:ring-brand-blue focus:border-brand-blue">
                             <option>All actions</option>
                         </select>
-                        <button className="w-full md:w-auto bg-brand-primary text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-primary-hover transition-colors duration-200">
+                        <button className="w-full md:w-auto bg-brand-blue text-white px-4 py-2 rounded-md font-semibold hover:bg-brand-blue-hover transition-colors duration-200">
                             Create address
                         </button>
                     </div>

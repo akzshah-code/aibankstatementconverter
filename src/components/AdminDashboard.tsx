@@ -1,5 +1,9 @@
-import React, { useState, lazy, Suspense } from "react";
+
+import { useState, lazy, Suspense, Dispatch, SetStateAction } from "react";
 import { User, BlogPost, EmailTemplate, EmailRoute } from "../lib/types";
+import { StatCard } from "./shared/StatCard";
+import { ChartCard } from "./shared/ChartCard";
+import BarChart from "./charts/BarChart";
 
 // Lazy-load the components for each admin tab to split them into separate chunks.
 const UserManagement = lazy(() => import("./admin/UserManagement"));
@@ -14,23 +18,11 @@ interface AdminDashboardProps {
     posts: BlogPost[];
     templates: EmailTemplate[];
     routes: EmailRoute[];
-    setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-    setPosts: React.Dispatch<React.SetStateAction<BlogPost[]>>;
-    setTemplates: React.Dispatch<React.SetStateAction<EmailTemplate[]>>;
-    setRoutes: React.Dispatch<React.SetStateAction<EmailRoute[]>>;
+    setUsers: Dispatch<SetStateAction<User[]>>;
+    setPosts: Dispatch<SetStateAction<BlogPost[]>>;
+    setTemplates: Dispatch<SetStateAction<EmailTemplate[]>>;
+    setRoutes: Dispatch<SetStateAction<EmailRoute[]>>;
 }
-
-const StatCard = ({ icon, title, value }: { icon: React.ReactNode, title: string, value: string | number }) => (
-    <div className="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-        <div className="bg-brand-blue-light p-3 rounded-full">
-            {icon}
-        </div>
-        <div>
-            <p className="text-sm text-brand-gray">{title}</p>
-            <p className="text-2xl font-bold text-brand-dark">{value}</p>
-        </div>
-    </div>
-);
 
 const TabContentFallback = () => (
     <div className="bg-white p-6 rounded-lg shadow-md text-center">
@@ -53,8 +45,18 @@ const AdminDashboard = ({ user, users, posts, templates, routes, setUsers, setPo
     
     // Calculate stats from props
     const totalUsers = users.length;
-    const professionalPlans = users.filter(u => u.plan === 'Professional').length;
-    const starterPlans = users.filter(u => u.plan === 'Starter').length;
+    const planCounts = users.reduce((acc, user) => {
+        acc[user.plan] = (acc[user.plan] || 0) + 1;
+        return acc;
+    }, {} as Record<User['plan'], number>);
+
+    const barChartData = [
+        { label: 'Free', value: planCounts.Free || 0 },
+        { label: 'Starter', value: planCounts.Starter || 0 },
+        { label: 'Professional', value: planCounts.Professional || 0 },
+        { label: 'Business', value: planCounts.Business || 0 },
+    ];
+
     const totalPagesUsed = users.reduce((sum, u) => sum + u.usage.used, 0);
 
     return (
@@ -86,7 +88,7 @@ const AdminDashboard = ({ user, users, posts, templates, routes, setUsers, setPo
 
             {/* Analytics Section */}
             <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-brand-dark">Analytics & Insights</h2>
+                <h2 className="text-2xl font-bold text-brand-dark">Key Metrics</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard 
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.084-1.284-.24-1.88M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.084-1.284.24-1.88M12 11a4 4 0 110-8 4 4 0 010 8z" /></svg>}
@@ -95,19 +97,24 @@ const AdminDashboard = ({ user, users, posts, templates, routes, setUsers, setPo
                     />
                     <StatCard 
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>}
-                        title="Professional Plans"
-                        value={professionalPlans}
+                        title="Active Subscriptions"
+                        value={totalUsers - (planCounts.Free || 0)}
                     />
                      <StatCard 
-                        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>}
-                        title="Starter Plans"
-                        value={starterPlans}
+                        icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>}
+                        title="Total Revenue (MRR)"
+                        value={"$0"}
                     />
                      <StatCard 
                         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-brand-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>}
                         title="Total Pages Used"
-                        value={totalPagesUsed}
+                        value={totalPagesUsed.toLocaleString()}
                     />
+                </div>
+                <div className="pt-4">
+                    <ChartCard title="User Analytics by Plan">
+                        <BarChart data={barChartData} />
+                    </ChartCard>
                 </div>
             </div>
 

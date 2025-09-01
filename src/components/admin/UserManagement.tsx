@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+
+import { useState, Dispatch, SetStateAction } from 'react';
 import { User } from '../../lib/types';
 import EditUserModal from './EditUserModal';
 
 interface UserManagementProps {
   users: User[];
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  setUsers: Dispatch<SetStateAction<User[]>>;
 }
 
 const UserManagement = ({ users, setUsers }: UserManagementProps) => {

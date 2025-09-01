@@ -1,14 +1,15 @@
-import React from 'react';
 
-const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+import type { FC, ReactNode } from 'react';
+
+const SectionTitle: FC<{ children: ReactNode }> = ({ children }) => (
   <h2 className="text-2xl font-bold text-brand-dark mt-8 mb-4">{children}</h2>
 );
 
-const Paragraph: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const Paragraph: FC<{ children: ReactNode }> = ({ children }) => (
   <p className="mb-4">{children}</p>
 );
 
-const ListItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const ListItem: FC<{ children: ReactNode }> = ({ children }) => (
   <li className="mb-2 ml-6">{children}</li>
 );
 

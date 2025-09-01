@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect, type FC } from 'react';
 import { User } from '../lib/types';
 
 interface Plan {
@@ -31,7 +32,7 @@ interface PricingProps {
     onPaymentSuccess: (planName: User['plan'], billingCycle: 'monthly' | 'annual') => void;
 }
 
-const PricingCard: React.FC<{ plan: Plan; onCtaClick: () => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
+const PricingCard: FC<{ plan: Plan; onCtaClick: () => void; userPlan: string | undefined }> = ({ plan, onCtaClick, userPlan }) => {
     const isCurrentPlan = plan.name === userPlan && !plan.isEnterprise;
     return (
         <div className={`border rounded-lg p-6 flex flex-col text-left h-full shadow-sm hover:shadow-lg transition-all duration-300 bg-white ${isCurrentPlan ? 'border-brand-primary border-2' : 'border-gray-200'}`}>

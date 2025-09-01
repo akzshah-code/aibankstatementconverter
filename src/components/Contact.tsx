@@ -1,4 +1,5 @@
-import React, { useState, FormEvent } from 'react';
+
+import { useState, FormEvent, ChangeEvent } from 'react';
 
 const Contact = () => {
   const [formState, setFormState] = useState({
@@ -8,7 +9,7 @@ const Contact = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormState(prevState => ({ ...prevState, [name]: value }));
   };
