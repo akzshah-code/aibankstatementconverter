@@ -32,7 +32,7 @@ const BlogPage = ({ posts, user, onLogout }: BlogPageProps) => {
       <Header user={user} onLogout={onLogout} />
       <main className="flex-grow overflow-y-auto container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark">Our Blog</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-brand-dark">Our Blog</h1>
             <p className="text-lg text-brand-gray mt-4 max-w-2xl mx-auto">Insights, tutorials, and updates from the BankConverts team.</p>
         </div>
         

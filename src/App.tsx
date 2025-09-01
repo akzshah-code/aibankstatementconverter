@@ -139,6 +139,16 @@ function App() {
       planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now',
     };
 
+    // Asynchronously send a welcome email without blocking the registration flow.
+    fetch('/api/send-welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newUser.name, email: newUser.email }),
+    }).catch(emailError => {
+      // Log the error for debugging but don't show it to the user.
+      console.error("Failed to trigger welcome email:", emailError);
+    });
+
     setAllUsers(prev => [...prev, newUser]);
     setUser(newUser);
     
@@ -168,6 +178,15 @@ function App() {
       usage: { used: 0, total: planDetails.pages },
       planRenews: billingCycle === 'annual' ? '1 year from now' : '1 month from now',
     };
+
+    // Asynchronously send a plan upgrade email.
+    fetch('/api/send-upgrade-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: updatedUser.name, email: updatedUser.email, planName: updatedUser.plan }),
+    }).catch(emailError => {
+      console.error("Failed to trigger upgrade email:", emailError);
+    });
 
     setUser(updatedUser);
     setAllUsers(prevUsers => prevUsers.map(u => u.id === updatedUser.id ? updatedUser : u));

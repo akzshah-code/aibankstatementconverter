@@ -183,7 +183,7 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
         <section className="py-20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark">
+                    <h1 className="text-4xl md:text-5xl font-bold text-brand-dark">
                         Find the Perfect Plan
                     </h1>
                     <p className="mt-4 text-lg text-brand-gray">
@@ -213,7 +213,7 @@ const Pricing = ({ user, onPaymentSuccess }: PricingProps) => {
                             </button>
                         </div>
                         <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full hidden sm:inline-block animate-fade-in">
-                            Save 50%
+                            Save 50% Yearly!
                         </span>
                     </div>
                 </div>
