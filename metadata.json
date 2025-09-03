@@ -1,0 +1,5 @@
+{
+  "name": "BankConverts",
+  "description": "A powerful and easy-to-use tool to convert bank statements from PDF or images into Excel or CSV files in seconds. Features AI-powered extraction, bulk uploads, and secure in-browser PDF unlocking.",
+  "requestFramePermissions": []
+}
